@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الإحصائيات — مجمع الإعلام الآلي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --blue:#2563eb;--blue-l:#3b82f6;--blue-d:#1d4ed8;--blue-pale:#eff6ff;
+  --green:#22c55e;--green-p:#f0fdf4;
+  --yellow:#eab308;--yellow-p:#fefce8;
+  --red:#ef4444;--red-p:#fef2f2;
+  --orange:#f97316;--orange-p:#fff7ed;
+  --purple:#8b5cf6;--purple-p:#f5f3ff;
+  --cyan:#06b6d4;--cyan-p:#ecfeff;
+  --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;
+  --g300:#cbd5e1;--g400:#94a3b8;--g500:#64748b;
+  --g700:#334155;--g900:#0f172a;--white:#ffffff;
+  --shadow:0 4px 20px rgba(37,99,235,.10);
+  --shadow-lg:0 12px 40px rgba(37,99,235,.16);
+  --r:14px;--rs:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:var(--g50);color:var(--g900);display:flex;min-height:100vh;}
+
+/* ── Sidebar ── */
+.sidebar{width:240px;background:var(--blue-d);min-height:100vh;display:flex;flex-direction:column;position:fixed;right:0;top:0;z-index:100;}
+[dir=ltr] .sidebar{right:auto;left:0;}
+.sb-logo{padding:26px 20px 18px;border-bottom:1px solid rgba(255,255,255,.12);}
+.sb-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px;}
+.sb-logo h2{color:#fff;font-size:14px;font-weight:700;}
+.sb-logo span{color:rgba(255,255,255,.5);font-size:11.5px;}
+.sb-nav{padding:14px 12px;flex:1;}
+.nav-lbl{color:rgba(255,255,255,.35);font-size:10px;font-weight:700;letter-spacing:.08em;padding:0 8px;margin:12px 0 5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--rs);color:rgba(255,255,255,.65);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,.18);color:#fff;}
+.nav-item .ico{font-size:16px;width:20px;text-align:center;}
+.nb{margin-right:auto;background:var(--blue-l);color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700;}
+[dir=ltr] .nb{margin-right:unset;margin-left:auto;}
+.sb-foot{padding:14px 12px;border-top:1px solid rgba(255,255,255,.12);}
+.uc{display:flex;align-items:center;gap:10px;padding:9px;background:rgba(255,255,255,.08);border-radius:var(--rs);}
+.ua{width:34px;height:34px;background:var(--blue-l);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0;}
+.un{color:#fff;font-size:12px;font-weight:700;}
+.ur{color:rgba(255,255,255,.45);font-size:11px;}
+
+/* ── Main ── */
+.main{margin-right:240px;flex:1;display:flex;flex-direction:column;}
+[dir=ltr] .main{margin-right:0;margin-left:240px;}
+
+/* ── Topbar ── */
+.topbar{background:var(--white);border-bottom:1px solid var(--g200);padding:0 28px;height:64px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:17px;font-weight:700;flex:1;}
+.topbar-right{display:flex;align-items:center;gap:9px;}
+.lang-sw{display:flex;background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:3px;gap:2px;}
+.lb{padding:5px 11px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;color:var(--g500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+.lb.active{background:var(--white);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* Period selector */
+.period-sel{display:flex;background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:3px;gap:2px;}
+.pb{padding:5px 13px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;color:var(--g500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+.pb.active{background:var(--white);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+.action-btns{display:flex;gap:8px;}
+.btn-action{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--rs);font-size:12.5px;font-weight:700;cursor:pointer;border:none;font-family:'Cairo',sans-serif;transition:all .15s;white-space:nowrap;}
+.btn-print{background:var(--g100);color:var(--g700);border:1px solid var(--g200);}
+.btn-print:hover{background:var(--g200);}
+.btn-share{background:var(--blue);color:#fff;}
+.btn-share:hover{background:var(--blue-d);}
+.btn-export{background:var(--green-p);color:#166534;border:1px solid #bbf7d0;}
+.btn-export:hover{background:#dcfce7;}
+
+/* ── Content ── */
+.content{padding:26px;flex:1;}
+
+/* ── KPI row ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:24px;}
+.kpi{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:18px;text-align:center;position:relative;overflow:hidden;transition:box-shadow .2s;animation:fadeUp .4s ease both;}
+.kpi:hover{box-shadow:var(--shadow);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.k-blue::before{background:var(--blue);}
+.kpi.k-green::before{background:var(--green);}
+.kpi.k-yellow::before{background:var(--yellow);}
+.kpi.k-red::before{background:var(--red);}
+.kpi.k-purple::before{background:var(--purple);}
+.kpi-icon{font-size:22px;margin-bottom:6px;}
+.kpi-val{font-size:28px;font-weight:900;line-height:1;color:var(--g900);}
+.kpi-lbl{font-size:11.5px;color:var(--g500);font-weight:600;margin-top:5px;}
+.kpi-delta{font-size:11px;margin-top:6px;font-weight:700;}
+.kpi-delta.up{color:var(--green);}
+.kpi-delta.down{color:var(--red);}
+
+/* ── Section title ── */
+.sec-title{font-size:15px;font-weight:800;color:var(--g900);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-title span{font-size:18px;}
+
+/* ── Grid layouts ── */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;}
+.grid-21{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:24px;}
+.grid-12{display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-bottom:24px;}
+
+/* ── Card ── */
+.card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;animation:fadeUp .4s ease both;}
+.ch{padding:16px 20px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;}
+.ch h3{font-size:13.5px;font-weight:800;flex:1;color:var(--g900);}
+.ch-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.cb{padding:20px;}
+
+/* ── Chart wrappers ── */
+.chart-wrap{position:relative;width:100%;display:flex;align-items:center;justify-content:center;}
+.donut-wrap{position:relative;width:200px;height:200px;margin:0 auto;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.donut-center .dv{font-size:26px;font-weight:900;color:var(--g900);}
+.donut-center .dl{font-size:11px;color:var(--g500);font-weight:600;}
+
+/* ── Legend list ── */
+.leg-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+.leg-item{display:flex;align-items:center;gap:9px;font-size:12.5px;}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.leg-name{flex:1;color:var(--g700);font-weight:600;}
+.leg-val{font-weight:800;color:var(--g900);}
+.leg-pct{color:var(--g400);font-size:11px;font-weight:600;}
+
+/* ── Bar mini ── */
+.mini-bar-row{display:flex;flex-direction:column;gap:11px;}
+.mbr{display:flex;flex-direction:column;gap:4px;}
+.mbr-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.mbr-name{font-weight:700;color:var(--g700);}
+.mbr-val{font-weight:800;color:var(--g900);}
+.mbr-track{height:8px;background:var(--g100);border-radius:99px;overflow:hidden;}
+.mbr-fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+
+/* ── Heat table ── */
+.heat-table{width:100%;border-collapse:collapse;font-size:12px;}
+.heat-table th{background:var(--g50);color:var(--g500);font-weight:700;padding:8px 12px;text-align:center;border-bottom:1px solid var(--g200);}
+.heat-table td{padding:8px 12px;text-align:center;border-bottom:1px solid var(--g100);font-weight:700;}
+.heat-table tr:last-child td{border-bottom:none;}
+.heat-table td.room-name{text-align:right;font-weight:800;color:var(--g900);}
+[dir=ltr] .heat-table td.room-name{text-align:left;}
+.hc{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:6px;font-size:12px;font-weight:800;}
+.hc-0{background:#f0fdf4;color:#166534;}
+.hc-1{background:#fefce8;color:#854d0e;}
+.hc-2{background:#fff7ed;color:#9a3412;}
+.hc-3{background:#fef2f2;color:#991b1b;}
+
+/* ── Trend indicator ── */
+.trend{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.trend.up{background:var(--green-p);color:#166534;}
+.trend.down{background:var(--red-p);color:#991b1b;}
+.trend.flat{background:var(--g100);color:var(--g500);}
+
+/* ══════════════════════
+   LEADERBOARD
+══════════════════════ */
+.lb-list{display:flex;flex-direction:column;gap:0;}
+.lb-item{display:flex;align-items:center;gap:13px;padding:14px 20px;border-bottom:1px solid var(--g100);transition:background .12s;cursor:default;}
+.lb-item:last-child{border-bottom:none;}
+.lb-item:hover{background:var(--g50);}
+.lb-item.gold{background:linear-gradient(90deg,#fffbeb,#fff);}
+.lb-item.silver{background:linear-gradient(90deg,#f8fafc,#fff);}
+.lb-item.bronze{background:linear-gradient(90deg,#fff7ed,#fff);}
+[dir=ltr] .lb-item.gold{background:linear-gradient(270deg,#fffbeb,#fff);}
+.rank-badge{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:900;}
+.rb-1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;}
+.rb-2{background:linear-gradient(135deg,#d1d5db,#9ca3af);color:#fff;}
+.rb-3{background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;}
+.rb-n{background:var(--g100);color:var(--g500);font-size:13px;}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-size:14px;font-weight:800;color:var(--g900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-email{font-size:11.5px;color:var(--g400);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.lb-pts{font-size:16px;font-weight:900;color:var(--blue);}
+.lb-pts.gold-c{color:var(--yellow);}
+.lb-rep{font-size:11px;color:var(--g500);font-weight:600;text-align:center;}
+.lb-badge-count{background:var(--blue-pale);color:var(--blue-d);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+
+/* ── Progress ring ── */
+.ring-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:8px 0;}
+.ring-item{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--g100);stroke-width:8;}
+.ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);}
+.ring-label{font-size:12px;font-weight:700;color:var(--g700);text-align:center;}
+.ring-pct{font-size:13px;font-weight:900;color:var(--g900);}
+
+/* ── Share overlay ── */
+.share-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;}
+.share-overlay.open{display:flex;}
+.share-modal{background:var(--white);border-radius:18px;width:400px;max-width:95vw;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2);animation:slideIn .22s ease;}
+@keyframes slideIn{from{transform:translateY(20px) scale(.97);opacity:0;}to{transform:none;opacity:1;}}
+.share-header{padding:18px 22px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;}
+.share-header h3{font-size:14.5px;font-weight:800;flex:1;}
+.mc{cursor:pointer;font-size:18px;color:var(--g400);}
+.mc:hover{color:var(--g900);}
+.share-body{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.share-opt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px;background:var(--g50);border:1.5px solid var(--g200);border-radius:12px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:700;color:var(--g700);}
+.share-opt:hover{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);}
+.share-opt .so-ico{font-size:26px;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:500;display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ── Print ── */
+@media print {
+  .sidebar,.topbar,.topbar-right,.action-btns,.lang-sw,.period-sel,.btn-print,.btn-share,.btn-export,.toast,.share-overlay{display:none!important;}
+  .main{margin:0!important;}
+  .content{padding:0!important;}
+  body{background:#fff;}
+  .card,.kpi{box-shadow:none;border:1px solid #e2e8f0;}
+  .print-header{display:block!important;}
+}
+.print-header{display:none;text-align:center;padding:20px 0 10px;}
+.print-header h2{font-size:18px;font-weight:800;}
+.print-header p{font-size:13px;color:var(--g500);}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--g200);border-radius:99px;}
+
+@media(max-width:1100px){
+  .kpi-row{grid-template-columns:repeat(3,1fr);}
+  .grid-21,.grid-12{grid-template-columns:1fr;}
+  .grid-3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:800px){
+  .sidebar{display:none;}.main{margin:0!important;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .content{padding:14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-icon">🔧</div>
+    <h2 id="sb-t">منصة الصيانة</h2>
+    <span id="sb-s">مجمع الإعلام الآلي</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-lbl" id="nl1">القائمة</div>
+    <a href="dashboard.html"><div class="nav-item" onclick="navGo(this)"><span class="ico">📋</span><span data-k="n_reports">البلاغات</span><span class="nb">12</span></div></a>
+    <a href="rooms.html"><div class="nav-item" onclick="navGo(this)"><span class="ico">🏫</span><span data-k="n_rooms">القاعات</span></div></a>
+    <div class="nav-lbl" id="nl2">المتابعة</div>
+    <div class="nav-item active" onclick="navGo(this)"><span class="ico">📊</span><span data-k="n_stats">الإحصائيات</span></div>
+    <div class="nav-item" onclick="navGo(this)"><span class="ico">🗂️</span><span data-k="n_log">سجل العمليات</span></div>
+  </nav>
+  <div class="sb-foot">
+    <div class="uc">
+      <div class="ua">👷</div>
+      <div><div class="un" data-k="u_name">مسؤول الصيانة</div><div class="ur" data-k="u_role">مشرف أول</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="pg-title">📊 الإحصائيات والتحليلات</h1>
+    <div class="topbar-right">
+      <div class="period-sel">
+        <button class="pb active" onclick="setPeriod(this,'week')" data-k="p_week">أسبوع</button>
+        <button class="pb" onclick="setPeriod(this,'month')" data-k="p_month">شهر</button>
+        <button class="pb" onclick="setPeriod(this,'semester')" data-k="p_sem">فصل</button>
+      </div>
+      <div class="lang-sw">
+        <button class="lb active" onclick="setLang('ar')">ع</button>
+        <button class="lb" onclick="setLang('fr')">FR</button>
+        <button class="lb" onclick="setLang('en')">EN</button>
+      </div>
+      <div class="action-btns">
+        <button class="btn-action btn-print" onclick="printPage()">🖨️ <span data-k="btn_print">طباعة</span></button>
+        <button class="btn-action btn-share" onclick="openShare()">📤 <span data-k="btn_share">مشاركة</span></button>
+        <button class="btn-action btn-export" onclick="exportCSV()">📥 <span data-k="btn_export">تصدير CSV</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Print header -->
+    <div class="print-header">
+      <h2 id="print-title">الإحصائيات والتحليلات — مجمع الإعلام الآلي</h2>
+      <p id="print-date"></p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <!-- Row 1: Line chart + Donut status -->
+    <div class="grid-21" style="margin-bottom:24px;">
+      <div class="card" style="animation-delay:.1s">
+        <div class="ch">
+          <h3 data-k="ch_trend">تطور البلاغات عبر الزمن</h3>
+          <span class="trend up" id="trendBadge">↑ +18%</span>
+        </div>
+        <div class="cb"><div class="chart-wrap" style="height:240px"><canvas id="lineChart"></canvas></div></div>
+      </div>
+      <div class="card" style="animation-delay:.15s">
+        <div class="ch"><h3 data-k="ch_status">توزيع الحالات</h3></div>
+        <div class="cb">
+          <div class="donut-wrap"><canvas id="statusDonut"></canvas>
+            <div class="donut-center"><div class="dv" id="donut-total">45</div><div class="dl" data-k="d_total">إجمالي</div></div>
+          </div>
+          <div class="leg-list" id="statusLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Room bars + Type donut + Severity donut -->
+    <div class="grid-3" style="margin-bottom:24px;">
+      <div class="card" style="animation-delay:.2s">
+        <div class="ch"><h3 data-k="ch_rooms">البلاغات حسب القاعة</h3></div>
+        <div class="cb"><div class="mini-bar-row" id="roomBars"></div></div>
+      </div>
+      <div class="card" style="animation-delay:.25s">
+        <div class="ch"><h3 data-k="ch_type">TD مقابل TP</h3></div>
+        <div class="cb">
+          <div class="donut-wrap" style="width:160px;height:160px;">
+            <canvas id="typeDonut"></canvas>
+            <div class="donut-center"><div class="dv" style="font-size:20px" id="type-total">45</div><div class="dl" data-k="d_reports">بلاغ</div></div>
+          </div>
+          <div class="leg-list" id="typeLegend"></div>
+        </div>
+      </div>
+      <div class="card" style="animation-delay:.3s">
+        <div class="ch"><h3 data-k="ch_sev">توزيع الخطورة</h3></div>
+        <div class="cb">
+          <div class="donut-wrap" style="width:160px;height:160px;">
+            <canvas id="sevDonut"></canvas>
+            <div class="donut-center"><div class="dv" style="font-size:20px" id="sev-total">45</div><div class="dl" data-k="d_reports">بلاغ</div></div>
+          </div>
+          <div class="leg-list" id="sevLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Completion rings + Heat map -->
+    <div class="grid-12" style="margin-bottom:24px;">
+      <div class="card" style="animation-delay:.35s">
+        <div class="ch"><h3 data-k="ch_resolve">معدل الحل حسب نوع العطل</h3></div>
+        <div class="cb"><div class="ring-row" id="ringRow"></div></div>
+      </div>
+      <div class="card" style="animation-delay:.4s">
+        <div class="ch">
+          <h3 data-k="ch_heat">خريطة حرارة القاعات</h3>
+          <span class="ch-badge" style="background:var(--blue-pale);color:var(--blue-d)" data-k="heat_sub">بلاغات معلقة</span>
+        </div>
+        <div class="cb" style="overflow-x:auto;"><table class="heat-table" id="heatTable"></table></div>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="card" style="animation-delay:.45s;margin-bottom:24px;">
+      <div class="ch">
+        <h3 data-k="ch_leaders">🏆 أفضل المبلّغين — ترتيب الفصل</h3>
+        <span class="ch-badge" style="background:var(--yellow-p);color:#854d0e" data-k="lb_sem">الفصل الثاني 2025</span>
+      </div>
+      <div class="lb-list" id="leaderboard"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Share modal -->
+<div class="share-overlay" id="shareOverlay" onclick="closeShareBg(event)">
+  <div class="share-modal">
+    <div class="share-header">
+      <h3 data-k="sh_title">مشاركة التقرير</h3>
+      <span class="mc" onclick="closeShare()">✕</span>
+    </div>
+    <div class="share-body">
+      <div class="share-opt" onclick="copyLink()"><span class="so-ico">🔗</span><span data-k="sh_link">نسخ الرابط</span></div>
+      <div class="share-opt" onclick="printPage()"><span class="so-ico">🖨️</span><span data-k="sh_print">طباعة PDF</span></div>
+      <div class="share-opt" onclick="exportCSV()"><span class="so-ico">📊</span><span data-k="sh_csv">تصدير CSV</span></div>
+      <div class="share-opt" onclick="shareEmail()"><span class="so-ico">📧</span><span data-k="sh_email">إرسال بريد</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+/* ═══════════════════════════════════════
+   TRANSLATIONS
+═══════════════════════════════════════ */
+const T = {
+ar:{
+  pg_title:"📊 الإحصائيات والتحليلات",
+  sb_t:"منصة الصيانة", sb_s:"مجمع الإعلام الآلي",
+  nl1:"القائمة", nl2:"المتابعة",
+  n_reports:"البلاغات", n_rooms:"القاعات", n_team:"فريق العمل",
+  n_stats:"الإحصائيات", n_log:"سجل العمليات",
+  u_name:"مسؤول الصيانة", u_role:"مشرف أول",
+  p_week:"أسبوع", p_month:"شهر", p_sem:"فصل",
+  btn_print:"طباعة", btn_share:"مشاركة", btn_export:"تصدير CSV",
+  ch_trend:"تطور البلاغات عبر الزمن",
+  ch_status:"توزيع الحالات",
+  ch_rooms:"البلاغات حسب القاعة",
+  ch_type:"TD مقابل TP",
+  ch_sev:"توزيع الخطورة",
+  ch_resolve:"معدل الحل حسب نوع العطل",
+  ch_heat:"خريطة حرارة القاعات",
+  ch_leaders:"🏆 أفضل المبلّغين — ترتيب الفصل",
+  d_total:"إجمالي", d_reports:"بلاغ",
+  heat_sub:"بلاغات معلقة",
+  lb_sem:"الفصل الثاني 2025",
+  sh_title:"مشاركة التقرير",
+  sh_link:"نسخ الرابط", sh_print:"طباعة PDF",
+  sh_csv:"تصدير CSV", sh_email:"إرسال بريد",
+  lbl_pending:"معلق", lbl_inprog:"جارٍ", lbl_done:"مكتمل",
+  lbl_normal:"عادي", lbl_medium:"متوسط", lbl_critical:"خطير",
+  kpi_total:"إجمالي البلاغات", kpi_pending:"معلقة",
+  kpi_done:"مكتملة", kpi_rate:"معدل الحل",
+  kpi_avg:"متوسط وقت الحل",
+  kpi_d_total:"+3 هذا الأسبوع", kpi_d_pending:"⚠ تحتاج متابعة",
+  kpi_d_done:"+2 هذا الشهر", kpi_d_rate:"↑ من 72%",
+  kpi_d_avg:"يوم", nav_toast:"📌 الصفحة قيد التطوير",
+  toast_copy:"✅ تم نسخ الرابط", toast_email:"📧 تم فتح البريد",
+  toast_csv:"📥 تم تصدير الملف", toast_print:"🖨️ جاري الطباعة...",
+  pts:"نقطة", reports_acc:"بلاغ مقبول",
+  ring_chair:"كرسي", ring_table:"طاولة", ring_elec:"كهرباء",
+  ring_door:"باب", ring_window:"نافذة", ring_board:"سبورة",
+  heat_floor:"الطابق", heat_week:"الأسبوع",
+  print_title:"الإحصائيات والتحليلات — مجمع الإعلام الآلي",
+  search_ph:"بحث...",
+},
+fr:{
+  pg_title:"📊 Statistiques & Analyses",
+  sb_t:"Maintenance", sb_s:"Complexe Informatique",
+  nl1:"MENU", nl2:"SUIVI",
+  n_reports:"Signalements", n_rooms:"Salles", n_team:"Équipe",
+  n_stats:"Statistiques", n_log:"Journal",
+  u_name:"Responsable", u_role:"Superviseur",
+  p_week:"Semaine", p_month:"Mois", p_sem:"Semestre",
+  btn_print:"Imprimer", btn_share:"Partager", btn_export:"Exporter CSV",
+  ch_trend:"Évolution des signalements",
+  ch_status:"Répartition par statut",
+  ch_rooms:"Signalements par salle",
+  ch_type:"TD versus TP",
+  ch_sev:"Répartition par gravité",
+  ch_resolve:"Taux de résolution par type",
+  ch_heat:"Carte thermique des salles",
+  ch_leaders:"🏆 Meilleurs rapporteurs — Semestre",
+  d_total:"Total", d_reports:"signalement",
+  heat_sub:"Signalements en attente",
+  lb_sem:"2ème Semestre 2025",
+  sh_title:"Partager le rapport",
+  sh_link:"Copier le lien", sh_print:"Imprimer PDF",
+  sh_csv:"Exporter CSV", sh_email:"Envoyer par email",
+  lbl_pending:"En attente", lbl_inprog:"En cours", lbl_done:"Terminé",
+  lbl_normal:"Normal", lbl_medium:"Moyen", lbl_critical:"Critique",
+  kpi_total:"Total signalements", kpi_pending:"En attente",
+  kpi_done:"Complétés", kpi_rate:"Taux de résolution",
+  kpi_avg:"Délai moyen de résolution",
+  kpi_d_total:"+3 cette semaine", kpi_d_pending:"⚠ À traiter",
+  kpi_d_done:"+2 ce mois", kpi_d_rate:"↑ de 72%",
+  kpi_d_avg:"jour(s)", nav_toast:"📌 Page en développement",
+  toast_copy:"✅ Lien copié", toast_email:"📧 Email ouvert",
+  toast_csv:"📥 Fichier exporté", toast_print:"🖨️ Impression...",
+  pts:"pts", reports_acc:"signalements",
+  ring_chair:"Chaise", ring_table:"Table", ring_elec:"Électricité",
+  ring_door:"Porte", ring_window:"Fenêtre", ring_board:"Tableau",
+  heat_floor:"Étage", heat_week:"Semaine",
+  print_title:"Statistiques & Analyses — Complexe Informatique",
+  search_ph:"Rechercher...",
+},
+en:{
+  pg_title:"📊 Statistics & Analytics",
+  sb_t:"Maintenance Panel", sb_s:"CS Complex",
+  nl1:"MENU", nl2:"TRACKING",
+  n_reports:"Reports", n_rooms:"Rooms", n_team:"Team",
+  n_stats:"Statistics", n_log:"Activity Log",
+  u_name:"Maintenance Manager", u_role:"Head Supervisor",
+  p_week:"Week", p_month:"Month", p_sem:"Semester",
+  btn_print:"Print", btn_share:"Share", btn_export:"Export CSV",
+  ch_trend:"Reports over time",
+  ch_status:"Status distribution",
+  ch_rooms:"Reports by room",
+  ch_type:"TD vs TP",
+  ch_sev:"Severity distribution",
+  ch_resolve:"Resolution rate by type",
+  ch_heat:"Room heat map",
+  ch_leaders:"🏆 Top Reporters — Semester Ranking",
+  d_total:"Total", d_reports:"reports",
+  heat_sub:"Pending reports",
+  lb_sem:"2nd Semester 2025",
+  sh_title:"Share Report",
+  sh_link:"Copy link", sh_print:"Print PDF",
+  sh_csv:"Export CSV", sh_email:"Send email",
+  lbl_pending:"Pending", lbl_inprog:"In Progress", lbl_done:"Completed",
+  lbl_normal:"Normal", lbl_medium:"Medium", lbl_critical:"Critical",
+  kpi_total:"Total Reports", kpi_pending:"Pending",
+  kpi_done:"Completed", kpi_rate:"Resolution Rate",
+  kpi_avg:"Avg Resolution Time",
+  kpi_d_total:"+3 this week", kpi_d_pending:"⚠ Needs attention",
+  kpi_d_done:"+2 this month", kpi_d_rate:"↑ from 72%",
+  kpi_d_avg:"day(s)", nav_toast:"📌 Page under development",
+  toast_copy:"✅ Link copied", toast_email:"📧 Email opened",
+  toast_csv:"📥 File exported", toast_print:"🖨️ Printing...",
+  pts:"pts", reports_acc:"accepted",
+  ring_chair:"Chair", ring_table:"Table", ring_elec:"Electricity",
+  ring_door:"Door", ring_window:"Window", ring_board:"Board",
+  heat_floor:"Floor", heat_week:"Week",
+  print_title:"Statistics & Analytics — CS Complex",
+  search_ph:"Search...",
+},
+};
+
+let lang='ar';
+let period='week';
+let charts={};
+
+function t(k){ return T[lang][k]||T.ar[k]||k; }
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l==='ar'?'ar':'en';
+  document.documentElement.dir=l==='ar'?'rtl':'ltr';
+  document.querySelectorAll('.lb').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.lb[onclick="setLang('${l}')"]`).classList.add('active');
+  applyT();
+  buildAll();
+}
+
+function applyT(){
+  document.getElementById('pg-title').textContent=t('pg_title');
+  document.getElementById('sb-t').textContent=t('sb_t');
+  document.getElementById('sb-s').textContent=t('sb_s');
+  document.getElementById('nl1').textContent=t('nl1');
+  document.getElementById('nl2').textContent=t('nl2');
+  document.getElementById('print-title').textContent=t('print_title');
+  document.getElementById('print-date').textContent=new Date().toLocaleDateString(
+    lang==='ar'?'ar-DZ':lang==='fr'?'fr-FR':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.querySelectorAll('[data-k]').forEach(el=>{ el.textContent=t(el.dataset.k); });
+}
+
+/* ═══════════════════════════════════════
+   DATA sets per period
+═══════════════════════════════════════ */
+const DATA = {
+  week:{
+    kpi:{total:12,pending:5,done:4,rate:78,avg:2.3},
+    line:{labels:['السبت','الأحد','الاثنين','الثلاثاء','الأرع','الخميس','الجمعة'],
+          submitted:[2,1,3,2,1,2,1], resolved:[1,1,2,1,0,2,1]},
+    status:{pending:5,inprog:3,done:4},
+    rooms:[{n:'TD 01',v:4},{n:'TD 02',v:3},{n:'TP 01',v:3},{n:'TP 02',v:2}],
+    types:{TD:7,TP:5},
+    severity:{normal:5,medium:4,critical:3},
+    rings:[
+      {label:'ring_chair',done:3,total:5},{label:'ring_table',done:2,total:3},
+      {label:'ring_elec',done:1,total:4},{label:'ring_door',done:2,total:2},
+      {label:'ring_window',done:1,total:2},{label:'ring_board',done:0,total:2},
+    ],
+    heat:{rooms:['TD 01','TD 02','TP 01','TP 02'],weeks:['W1','W2','W3','W4'],vals:[[1,2,0,1],[0,1,2,0],[1,1,1,0],[0,0,1,1]]},
+    trend:'+18%',trendDir:'up',
+  },
+  month:{
+    kpi:{total:38,pending:9,done:24,rate:83,avg:1.8},
+    line:{labels:['أ1','أ2','أ3','أ4','م1','م2','م3','م4'],
+          submitted:[5,4,6,3,5,4,6,5], resolved:[3,4,5,2,4,3,5,4]},
+    status:{pending:9,inprog:5,done:24},
+    rooms:[{n:'TD 01',v:12},{n:'TD 02',v:9},{n:'TP 01',v:10},{n:'TP 02',v:7}],
+    types:{TD:21,TP:17},
+    severity:{normal:14,medium:15,critical:9},
+    rings:[
+      {label:'ring_chair',done:8,total:10},{label:'ring_table',done:5,total:7},
+      {label:'ring_elec',done:4,total:8},{label:'ring_door',done:6,total:6},
+      {label:'ring_window',done:4,total:5},{label:'ring_board',done:2,total:7},
+    ],
+    heat:{rooms:['TD 01','TD 02','TP 01','TP 02'],weeks:['W1','W2','W3','W4'],vals:[[3,2,4,3],[2,2,3,2],[2,3,2,3],[1,2,2,2]]},
+    trend:'+12%',trendDir:'up',
+  },
+  semester:{
+    kpi:{total:142,pending:15,done:118,rate:91,avg:1.4},
+    line:{labels:['فيف','مار','أبر','ماي','جوان','جوي','أوت','سبت','أكت','نوف','ديس','جان'],
+          submitted:[8,10,12,14,9,11,13,15,12,14,16,8],
+          resolved:[6,9,11,13,8,10,12,14,11,13,15,6]},
+    status:{pending:15,inprog:9,done:118},
+    rooms:[{n:'TD 01',v:38},{n:'TD 02',v:32},{n:'TP 01',v:42},{n:'TP 02',v:30}],
+    types:{TD:70,TP:72},
+    severity:{normal:54,medium:58,critical:30},
+    rings:[
+      {label:'ring_chair',done:28,total:32},{label:'ring_table',done:18,total:22},
+      {label:'ring_elec',done:15,total:24},{label:'ring_door',done:20,total:20},
+      {label:'ring_window',done:18,total:20},{label:'ring_board',done:19,total:24},
+    ],
+    heat:{rooms:['TD 01','TD 02','TP 01','TP 02'],weeks:['W1','W2','W3','W4'],vals:[[8,6,10,7],[5,7,9,6],[10,8,8,9],[6,5,7,8]]},
+    trend:'+24%',trendDir:'up',
+  },
+};
+
+const leaderboard=[
+  {rank:1,name:'أحمد بن علي',email:'ah.benali.inf@lagh-univ.dz',pts:120,reports:8,year:'LMD 3'},
+  {rank:2,name:'سارة بوزيد',email:'sa.bouzid.inf@lagh-univ.dz',pts:95,reports:6,year:'LMD 3'},
+  {rank:3,name:'يوسف حمادي',email:'yo.hammadi.inf@lagh-univ.dz',pts:80,reports:5,year:'LMD 2'},
+  {rank:4,name:'نور الهدى مزيان',email:'no.meziane.inf@lagh-univ.dz',pts:60,reports:4,year:'LMD 2'},
+  {rank:5,name:'عمر كحول',email:'om.kechoul.inf@lagh-univ.dz',pts:45,reports:3,year:'LMD 1'},
+  {rank:6,name:'إيمان بلعيد',email:'im.belaid.inf@lagh-univ.dz',pts:30,reports:2,year:'LMD 1'},
+];
+
+const COLORS={
+  blue:'#2563eb',green:'#22c55e',yellow:'#eab308',
+  red:'#ef4444',orange:'#f97316',purple:'#8b5cf6',
+  cyan:'#06b6d4',pink:'#ec4899',
+};
+
+/* ═══════════════════════════════════════
+   BUILD ALL
+═══════════════════════════════════════ */
+function buildAll(){
+  const d = DATA[period];
+  buildKPIs(d);
+  buildLineChart(d);
+  buildStatusDonut(d);
+  buildRoomBars(d);
+  buildTypeDonut(d);
+  buildSevDonut(d);
+  buildRings(d);
+  buildHeatMap(d);
+  buildLeaderboard();
+  // trend badge
+  const tb=document.getElementById('trendBadge');
+  tb.className=`trend ${d.trendDir}`;
+  tb.textContent=(d.trendDir==='up'?'↑ ':'↓ ')+d.trend;
+}
+
+/* ── KPIs ── */
+function buildKPIs(d){
+  const items=[
+    {cls:'k-blue',icon:'📋',val:d.kpi.total,lbl:'kpi_total',delta:'kpi_d_total',dd:'up'},
+    {cls:'k-yellow',icon:'⏳',val:d.kpi.pending,lbl:'kpi_pending',delta:'kpi_d_pending',dd:'down'},
+    {cls:'k-green',icon:'✅',val:d.kpi.done,lbl:'kpi_done',delta:'kpi_d_done',dd:'up'},
+    {cls:'k-purple',icon:'📈',val:d.kpi.rate+'%',lbl:'kpi_rate',delta:'kpi_d_rate',dd:'up'},
+    {cls:'k-red',icon:'⏱️',val:d.kpi.avg,lbl:'kpi_avg',delta:'kpi_d_avg',dd:'flat'},
+  ];
+  document.getElementById('kpiRow').innerHTML=items.map((k,i)=>`
+    <div class="kpi ${k.cls}" style="animation-delay:${i*.07}s">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-lbl">${t(k.lbl)}</div>
+      <div class="kpi-delta ${k.dd}">${t(k.delta)}</div>
+    </div>`).join('');
+}
+
+/* ── Line chart ── */
+function buildLineChart(d){
+  destroyChart('lineChart');
+  const ctx=document.getElementById('lineChart').getContext('2d');
+  charts.line=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:d.line.labels,
+      datasets:[
+        {label:t('lbl_pending'),data:d.line.submitted,borderColor:COLORS.blue,backgroundColor:'rgba(37,99,235,.08)',tension:.4,fill:true,pointBackgroundColor:COLORS.blue,pointRadius:4,pointHoverRadius:6,borderWidth:2.5},
+        {label:t('lbl_done'),data:d.line.resolved,borderColor:COLORS.green,backgroundColor:'rgba(34,197,94,.06)',tension:.4,fill:true,pointBackgroundColor:COLORS.green,pointRadius:4,pointHoverRadius:6,borderWidth:2.5},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{family:'Cairo',size:12},boxWidth:12,padding:16}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Cairo',size:11}}},
+               y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{family:'Cairo',size:11},stepSize:1}}}}
+  });
+
+
+}
+
+/* ── Status donut ── */
+function buildStatusDonut(d){
+  destroyChart('statusDonut');
+  const vals=[d.status.pending,d.status.inprog,d.status.done];
+  const total=vals.reduce((a,b)=>a+b,0);
+  document.getElementById('donut-total').textContent=total;
+  const labels=[t('lbl_pending'),t('lbl_inprog'),t('lbl_done')];
+  const colors=[COLORS.yellow,COLORS.blue,COLORS.green];
+  const ctx=document.getElementById('statusDonut').getContext('2d');
+  charts.status=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/total*100)}%)`}}}}});
+  document.getElementById('statusLegend').innerHTML=labels.map((l,i)=>`
+    <div class="leg-item">
+      <div class="leg-dot" style="background:${colors[i]}"></div>
+      <span class="leg-name">${l}</span>
+      <span class="leg-val">${vals[i]}</span>
+      <span class="leg-pct">${Math.round(vals[i]/total*100)}%</span>
+    </div>`).join('');
+}
+
+/* ── Room bars ── */
+function buildRoomBars(d){
+  const max=Math.max(...d.rooms.map(r=>r.v));
+  document.getElementById('roomBars').innerHTML=d.rooms.map(r=>`
+    <div class="mbr">
+      <div class="mbr-top"><span class="mbr-name">${r.n}</span><span class="mbr-val">${r.v}</span></div>
+      <div class="mbr-track"><div class="mbr-fill" style="width:${Math.round(r.v/max*100)}%;background:${r.n.startsWith('TD')?COLORS.blue:COLORS.orange}"></div></div>
+    </div>`).join('');
+}
+
+/* ── Type donut ── */
+function buildTypeDonut(d){
+  destroyChart('typeDonut');
+  const vals=[d.types.TD,d.types.TP];
+  const total=vals[0]+vals[1];
+  document.getElementById('type-total').textContent=total;
+  const ctx=document.getElementById('typeDonut').getContext('2d');
+  charts.type=new Chart(ctx,{type:'doughnut',data:{labels:['TD','TP'],datasets:[{data:vals,backgroundColor:[COLORS.blue,COLORS.orange],borderWidth:2,borderColor:'#fff',hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}}});
+  document.getElementById('typeLegend').innerHTML=[{l:'TD',v:vals[0],c:COLORS.blue},{l:'TP',v:vals[1],c:COLORS.orange}].map(x=>`
+    <div class="leg-item">
+      <div class="leg-dot" style="background:${x.c}"></div>
+      <span class="leg-name">${x.l}</span>
+      <span class="leg-val">${x.v}</span>
+      <span class="leg-pct">${Math.round(x.v/total*100)}%</span>
+    </div>`).join('');
+}
+
+/* ── Severity donut ── */
+function buildSevDonut(d){
+  destroyChart('sevDonut');
+  const vals=[d.severity.normal,d.severity.medium,d.severity.critical];
+  const total=vals.reduce((a,b)=>a+b,0);
+  document.getElementById('sev-total').textContent=total;
+  const labels=[t('lbl_normal'),t('lbl_medium'),t('lbl_critical')];
+  const colors=[COLORS.green,COLORS.yellow,COLORS.red];
+  const ctx=document.getElementById('sevDonut').getContext('2d');
+  charts.sev=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}}});
+  document.getElementById('sevLegend').innerHTML=labels.map((l,i)=>`
+    <div class="leg-item">
+      <div class="leg-dot" style="background:${colors[i]}"></div>
+      <span class="leg-name">${l}</span>
+      <span class="leg-val">${vals[i]}</span>
+      <span class="leg-pct">${Math.round(vals[i]/total*100)}%</span>
+    </div>`).join('');
+}
+
+/* ── Rings ── */
+function buildRings(d){
+  const R=44,C=2*Math.PI*R;
+  document.getElementById('ringRow').innerHTML=d.rings.map(r=>{
+    const pct=r.total>0?Math.round(r.done/r.total*100):0;
+    const fill=C*(1-pct/100);
+    const color=pct>=80?COLORS.green:pct>=50?COLORS.yellow:COLORS.red;
+    return `<div class="ring-item">
+      <div><svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="${R}"/>
+        <circle class="ring-fg" cx="50" cy="50" r="${R}" stroke="${color}"
+          stroke-dasharray="${C}" stroke-dashoffset="${fill}" style="transition:stroke-dashoffset .8s"/>
+        <text x="50" y="46" text-anchor="middle" font-family="Cairo" font-size="15" font-weight="900" fill="${color}" transform="rotate(90,50,50)">${pct}%</text>
+        <text x="50" y="60" text-anchor="middle" font-family="Cairo" font-size="9" fill="#64748b" transform="rotate(90,50,50)">${r.done}/${r.total}</text>
+      </svg></div>
+      <div class="ring-label">${t(r.label)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Heat map ── */
+function buildHeatMap(d){
+  const {rooms,weeks,vals}=d.heat;
+  const wLabels=weeks.map((_,i)=>t('heat_week')+' '+(i+1));
+  let html=`<thead><tr><th>${t('heat_floor')}</th>${wLabels.map(w=>`<th>${w}</th>`).join('')}</tr></thead><tbody>`;
+  rooms.forEach((room,ri)=>{
+    html+=`<tr><td class="room-name">${room}</td>`;
+    vals[ri].forEach(v=>{
+      const cls=v===0?'hc-0':v<=1?'hc-1':v<=2?'hc-2':'hc-3';
+      html+=`<td><span class="hc ${cls}">${v}</span></td>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</tbody>`;
+  document.getElementById('heatTable').innerHTML=html;
+}
+
+/* ── Leaderboard ── */
+function buildLeaderboard(){
+  const rankClasses=['gold','silver','bronze','','',''];
+  const rbClasses=['rb-1','rb-2','rb-3','rb-n','rb-n','rb-n'];
+  const rankIcons=['🥇','🥈','🥉','4','5','6'];
+  document.getElementById('leaderboard').innerHTML=leaderboard.map((s,i)=>`
+    <div class="lb-item ${rankClasses[i]}">
+      <div class="rank-badge ${rbClasses[i]}">${rankIcons[i]}</div>
+      <div class="lb-info">
+        <div class="lb-name">${s.name}</div>
+        <div class="lb-email">✉ ${s.email}</div>
+        <div class="lb-email" style="color:var(--g500);margin-top:2px">🎓 ${s.year}</div>
+      </div>
+      <div class="lb-meta">
+        <div style="text-align:center">
+          <div class="lb-pts ${i===0?'gold-c':''}">${s.pts} <span style="font-size:11px;font-weight:600">${t('pts')}</span></div>
+          <div class="lb-rep">${s.reports} ${t('reports_acc')}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Period ── */
+function setPeriod(el,p){
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  period=p;
+  buildAll();
+}
+
+/* ── Chart destroy ── */
+function destroyChart(id){
+  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+}
+
+/* ── Actions ── */
+function printPage(){
+  closeShare();
+  document.getElementById('print-date').textContent=new Date().toLocaleDateString(
+    lang==='ar'?'ar-DZ':lang==='fr'?'fr-FR':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  showToast(t('toast_print'));
+  setTimeout(()=>window.print(),400);
+}
+
+function openShare(){ document.getElementById('shareOverlay').classList.add('open'); }
+function closeShare(){ document.getElementById('shareOverlay').classList.remove('open'); }
+function closeShareBg(e){ if(e.target===document.getElementById('shareOverlay')) closeShare(); }
+
+function copyLink(){
+  navigator.clipboard.writeText(window.location.href).catch(()=>{});
+  closeShare();
+  showToast(t('toast_copy'));
+}
+
+function shareEmail(){
+  const sub=encodeURIComponent(t('print_title'));
+  const body=encodeURIComponent(`${t('print_title')}\n\n${window.location.href}`);
+  window.location.href=`mailto:?subject=${sub}&body=${body}`;
+  closeShare();
+  showToast(t('toast_email'));
+}
+
+function exportCSV(){
+  closeShare();
+  const d=DATA[period];
+  let csv=`${t('kpi_total')},${t('kpi_pending')},${t('kpi_done')},${t('kpi_rate')}\n`;
+  csv+=`${d.kpi.total},${d.kpi.pending},${d.kpi.done},${d.kpi.rate}%\n\n`;
+  csv+=`${t('ch_rooms')}\n`;
+  d.rooms.forEach(r=>csv+=`${r.n},${r.v}\n`);
+  csv+=`\n${t('ch_leaders')}\n`;
+  csv+=`Rank,Name,Email,Points,Reports\n`;
+  leaderboard.forEach(s=>csv+=`${s.rank},${s.name},${s.email},${s.pts},${s.reports}\n`);
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`stats_${period}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast(t('toast_csv'));
+}
+
+/* ── Toast ── */
+function showToast(msg){
+  const el=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+/* ── Nav ── */
+function navGo(el){
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const isStats=el.querySelector('[data-k]')?.dataset?.k==='n_stats';
+  if(!isStats) showToast(t('nav_toast'));
+}
+
+/* ── INIT ── */
+applyT();
+buildAll();
+</script>
+</body>
+</html>

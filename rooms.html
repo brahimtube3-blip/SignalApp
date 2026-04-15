@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة القاعات — مجمع الإعلام الآلي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --blue:#2563eb; --blue-light:#3b82f6; --blue-dark:#1d4ed8;
+    --blue-pale:#eff6ff; --blue-border:#bfdbfe;
+    --green:#22c55e; --green-pale:#f0fdf4;
+    --yellow:#eab308; --yellow-pale:#fefce8;
+    --red:#ef4444; --red-pale:#fef2f2;
+    --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+    --gray-300:#cbd5e1; --gray-400:#94a3b8; --gray-500:#64748b;
+    --gray-700:#334155; --gray-900:#0f172a; --white:#ffffff;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.07);
+    --shadow:0 4px 16px rgba(37,99,235,.10);
+    --shadow-lg:0 12px 40px rgba(37,99,235,.16);
+    --radius:14px; --radius-sm:9px; --radius-xs:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Cairo',sans-serif;background:var(--gray-50);color:var(--gray-900);min-height:100vh;display:flex;}
+
+  /* ── Sidebar ── */
+  .sidebar{width:240px;background:var(--blue-dark);min-height:100vh;display:flex;flex-direction:column;position:fixed;right:0;top:0;bottom:0;z-index:100;}
+  [dir="ltr"] .sidebar{right:auto;left:0;}
+  .sidebar-logo{padding:28px 20px 20px;border-bottom:1px solid rgba(255,255,255,.12);}
+  .logo-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:20px;}
+  .sidebar-logo h2{color:#fff;font-size:15px;font-weight:700;line-height:1.4;}
+  .sidebar-logo span{color:rgba(255,255,255,.5);font-size:12px;}
+  .sidebar nav{padding:16px 12px;flex:1;}
+  .nav-label{color:rgba(255,255,255,.38);font-size:10px;font-weight:700;letter-spacing:.08em;padding:0 8px;margin:12px 0 6px;text-transform:uppercase;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.65);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .16s;margin-bottom:2px;}
+  .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .nav-item.active{background:rgba(255,255,255,.18);color:#fff;}
+  .nav-item .ico{font-size:17px;width:22px;text-align:center;}
+  .nav-badge{margin-right:auto;background:var(--blue-light);color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700;}
+  [dir="ltr"] .nav-badge{margin-right:unset;margin-left:auto;}
+  .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.12);}
+  .user-card{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.08);border-radius:var(--radius-sm);}
+  .user-avatar{width:36px;height:36px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;}
+  .user-info .name{color:#fff;font-size:12.5px;font-weight:700;}
+  .user-info .role{color:rgba(255,255,255,.45);font-size:11px;}
+
+  /* ── Main ── */
+  .main{margin-right:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+  [dir="ltr"] .main{margin-right:0;margin-left:240px;}
+
+  /* ── Topbar ── */
+  .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 28px;height:64px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;}
+  .topbar h1{font-size:17px;font-weight:700;color:var(--gray-900);flex:1;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+
+  .lang-switcher{display:flex;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:8px;padding:3px;gap:2px;}
+  .lang-btn{padding:5px 11px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;color:var(--gray-500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+  .lang-btn.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
+
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:7px 13px;}
+  .search-box input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:13px;color:var(--gray-700);outline:none;width:160px;}
+
+  .btn-add{display:flex;align-items:center;gap:7px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .15s;white-space:nowrap;}
+  .btn-add:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:var(--shadow);}
+
+  /* ── Content ── */
+  .content{padding:28px;flex:1;}
+
+  /* ── Loading ── */
+  .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+  .spinner{width:42px;height:42px;border:4px solid var(--blue-border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-text{font-size:14px;font-weight:700;color:var(--gray-500);}
+
+  /* ── Summary bar ── */
+  .summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+  .sum-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;gap:14px;transition:box-shadow .2s;}
+  .sum-card:hover{box-shadow:var(--shadow);}
+  .sum-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+  .sum-icon.blue{background:var(--blue-pale);}
+  .sum-icon.green{background:var(--green-pale);}
+  .sum-icon.yellow{background:var(--yellow-pale);}
+  .sum-icon.red{background:var(--red-pale);}
+  .sum-val{font-size:24px;font-weight:900;color:var(--gray-900);line-height:1;}
+  .sum-lbl{font-size:12px;color:var(--gray-500);margin-top:3px;font-weight:500;}
+
+  /* ── Filters ── */
+  .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .filter-tabs{display:flex;gap:4px;background:var(--gray-100);border-radius:8px;padding:3px;}
+  .filter-tab{padding:6px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--gray-500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+  .filter-tab.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
+  .view-toggle{display:flex;gap:4px;background:var(--gray-100);border-radius:8px;padding:3px;margin-right:auto;}
+  [dir="ltr"] .view-toggle{margin-right:unset;margin-left:auto;}
+  .view-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;font-size:14px;color:var(--gray-500);transition:all .15s;border:none;background:transparent;}
+  .view-btn.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
+
+  /* ── Legend ── */
+  .legend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:12px 16px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-sm);}
+  .legend-title{font-size:12px;font-weight:700;color:var(--gray-500);}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-700);font-weight:600;}
+  .legend-dot{width:12px;height:12px;border-radius:3px;}
+
+  /* ── Grid view ── */
+  .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+
+  .room-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;transition:all .2s;position:relative;cursor:default;animation:fadeUp .3s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .room-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+
+  .room-color-bar{height:5px;width:100%;}
+  .bar-green{background:var(--green);}
+  .bar-yellow{background:var(--yellow);}
+  .bar-red{background:var(--red);}
+  .bar-gray{background:var(--gray-300);}
+
+  .room-card-body{padding:18px;}
+  .room-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+  .room-name-row{display:flex;align-items:center;gap:9px;}
+  .room-type-badge{padding:3px 9px;border-radius:5px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+  .type-td{background:#dbeafe;color:#1e40af;}
+  .type-tp{background:#fce7f3;color:#9d174d;}
+  .room-name{font-size:16px;font-weight:900;color:var(--gray-900);}
+  .room-actions{display:flex;gap:5px;}
+  .icon-action{width:30px;height:30px;border:1px solid var(--gray-200);background:var(--white);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .13s;}
+  .icon-action:hover{background:var(--gray-100);}
+  .icon-action.del:hover{background:var(--red-pale);border-color:#fca5a5;}
+
+  .status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;margin-bottom:14px;}
+  .pill-dot{width:7px;height:7px;border-radius:50%;}
+  .pill-good{background:var(--green-pale);color:#166534;}
+  .pill-good .pill-dot{background:var(--green);}
+  .pill-warn{background:var(--yellow-pale);color:#854d0e;}
+  .pill-warn .pill-dot{background:var(--yellow);}
+  .pill-danger{background:var(--red-pale);color:#991b1b;}
+  .pill-danger .pill-dot{background:var(--red);}
+  .pill-idle{background:var(--gray-100);color:var(--gray-500);}
+  .pill-idle .pill-dot{background:var(--gray-400);}
+
+  .room-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .r-stat{background:var(--gray-50);border-radius:8px;padding:9px 8px;text-align:center;}
+  .r-stat .rv{font-size:18px;font-weight:900;color:var(--gray-900);}
+  .r-stat .rl{font-size:10.5px;color:var(--gray-500);font-weight:600;margin-top:2px;}
+  .r-stat.pending .rv{color:var(--yellow);}
+  .r-stat.inprog .rv{color:var(--blue);}
+  .r-stat.done .rv{color:var(--green);}
+
+  /* ── List view ── */
+  .rooms-list{display:flex;flex-direction:column;gap:0;}
+  .rooms-list .room-row{background:var(--white);border:1px solid var(--gray-200);border-radius:0;border-bottom:none;display:flex;align-items:center;gap:14px;padding:13px 18px;transition:background .12s;}
+  .rooms-list .room-row:first-child{border-radius:var(--radius) var(--radius) 0 0;}
+  .rooms-list .room-row:last-child{border-bottom:1px solid var(--gray-200);border-radius:0 0 var(--radius) var(--radius);}
+  .rooms-list .room-row:hover{background:var(--gray-50);}
+  .status-bar-mini{width:6px;height:38px;border-radius:3px;flex-shrink:0;}
+  .row-name{font-size:14px;font-weight:800;color:var(--gray-900);min-width:80px;}
+  .row-type{min-width:48px;}
+  .row-status{flex:1;}
+  .row-counts{display:flex;gap:20px;align-items:center;}
+  .count-item{text-align:center;}
+  .count-item .cv{font-size:15px;font-weight:900;}
+  .count-item .cl{font-size:10.5px;color:var(--gray-500);font-weight:600;}
+  .count-item.p .cv{color:var(--yellow);}
+  .count-item.i .cv{color:var(--blue);}
+  .count-item.d .cv{color:var(--green);}
+  .row-actions{display:flex;gap:6px;margin-right:auto;}
+  [dir="ltr"] .row-actions{margin-right:unset;margin-left:auto;}
+
+  /* ── Modal ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:18px;width:440px;max-width:95vw;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.18);animation:slideIn .22s ease;}
+  @keyframes slideIn{from{transform:translateY(20px) scale(.97);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+  .modal-header{padding:20px 22px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;}
+  .modal-header h3{font-size:15px;font-weight:700;flex:1;}
+  .modal-close{cursor:pointer;font-size:18px;color:var(--gray-400);}
+  .modal-close:hover{color:var(--gray-900);}
+  .modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-label{font-size:12.5px;font-weight:700;color:var(--gray-700);}
+  .form-input{border:1.5px solid var(--gray-200);border-radius:9px;padding:10px 13px;font-size:13.5px;font-family:'Cairo',sans-serif;color:var(--gray-900);outline:none;transition:border .15s;}
+  .form-input:focus{border-color:var(--blue);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .type-selector{display:flex;gap:8px;}
+  .type-opt{flex:1;padding:10px;border:1.5px solid var(--gray-200);border-radius:9px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s;color:var(--gray-500);}
+  .type-opt:hover{border-color:var(--blue-border);}
+  .type-opt.selected-td{border-color:#1e40af;background:#dbeafe;color:#1e40af;}
+  .type-opt.selected-tp{border-color:#9d174d;background:#fce7f3;color:#9d174d;}
+  .modal-footer{padding:16px 22px;border-top:1px solid var(--gray-100);display:flex;gap:10px;justify-content:flex-end;}
+  .btn-lg{padding:9px 22px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;border:none;font-family:'Cairo',sans-serif;transition:all .15s;}
+  .btn-lg.primary{background:var(--blue);color:#fff;}
+  .btn-lg.primary:hover{background:var(--blue-dark);}
+  .btn-lg:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-lg.outline{background:transparent;color:var(--gray-700);border:1.5px solid var(--gray-200);}
+  .btn-lg.outline:hover{background:var(--gray-100);}
+  .btn-lg.danger{background:var(--red);color:#fff;}
+  .btn-lg.danger:hover{background:#dc2626;}
+
+  .confirm-icon{font-size:42px;text-align:center;margin-bottom:4px;}
+  .confirm-msg{text-align:center;font-size:14px;color:var(--gray-700);line-height:1.7;}
+
+  /* ── Toast ── */
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gray-900);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:500;display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.error{background:#dc2626;}
+
+  .empty-grid{grid-column:1/-1;text-align:center;padding:60px;color:var(--gray-400);}
+  .empty-grid .ei{font-size:46px;margin-bottom:10px;}
+  .empty-grid p{font-size:14px;}
+
+  ::-webkit-scrollbar{width:5px;}
+  ::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px;}
+
+  @media(max-width:900px){
+    .summary-bar{grid-template-columns:repeat(2,1fr);}
+    .sidebar{display:none;} .main{margin-right:0!important;margin-left:0!important;}
+    .content{padding:14px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">جارٍ تحميل البيانات...</div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🔧</div>
+    <h2 id="sb-title">منصة الصيانة</h2>
+    <span id="sb-sub">مجمع الإعلام الآلي</span>
+  </div>
+  <nav>
+    <div class="nav-label" id="nav-main-lbl">القائمة</div>
+    <a href="dashboard.html" style="text-decoration:none">
+      <div class="nav-item"><span class="ico">📋</span><span data-t="nav_reports">البلاغات</span><span class="nav-badge" id="pendingBadge">0</span></div>
+    </a>
+    <a href="rooms.html" style="text-decoration:none">
+      <div class="nav-item active"><span class="ico">🏫</span><span data-t="nav_rooms">القاعات</span></div>
+    </a>
+    <div class="nav-label" id="nav-follow-lbl">المتابعة</div>
+    <a href="statistics.html"><div class="nav-item" onclick="navGo(this,'stats')"><span class="ico">📊</span><span data-t="nav_stats">الإحصائيات</span></div></a>
+    <div class="nav-item" onclick="navGo(this,'log')"><span class="ico">🗂️</span><span data-t="nav_log">سجل العمليات</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">👷</div>
+      <div class="user-info">
+        <div class="name" data-t="user_name">مسؤول الصيانة</div>
+        <div class="role" data-t="user_role">مشرف أول</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="page-title">🏫 إدارة القاعات</h1>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" oninput="renderRooms()" />
+      </div>
+      <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLang('ar')">ع</button>
+        <button class="lang-btn" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="btn-add" onclick="openAddModal()" id="btn-add-room">
+        <span>＋</span>
+        <span data-t="add_room">إضافة قاعة</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="summary-bar">
+      <div class="sum-card">
+        <div class="sum-icon blue">🏫</div>
+        <div><div class="sum-val" id="sum-total">0</div><div class="sum-lbl" data-t="sum_total">إجمالي القاعات</div></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-icon green">✅</div>
+        <div><div class="sum-val" id="sum-good">0</div><div class="sum-lbl" data-t="sum_good">بحالة جيدة</div></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-icon yellow">⚠️</div>
+        <div><div class="sum-val" id="sum-warn">0</div><div class="sum-lbl" data-t="sum_warn">تحتاج متابعة</div></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-icon red">🚨</div>
+        <div><div class="sum-val" id="sum-danger">0</div><div class="sum-lbl" data-t="sum_danger">في خطر</div></div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" onclick="setFilter(this,'all')" data-t="fil_all">الكل</button>
+        <button class="filter-tab" onclick="setFilter(this,'TD')">TD</button>
+        <button class="filter-tab" onclick="setFilter(this,'TP')">TP</button>
+        <button class="filter-tab" onclick="setFilter(this,'good')" data-t="fil_good">جيدة</button>
+        <button class="filter-tab" onclick="setFilter(this,'warn')" data-t="fil_warn">تحذير</button>
+        <button class="filter-tab" onclick="setFilter(this,'danger')" data-t="fil_danger">خطر</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridBtn" onclick="setView('grid')" title="Grid">⊞</button>
+        <button class="view-btn" id="listBtn" onclick="setView('list')" title="List">☰</button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="legend-title" data-t="legend_title">دلالة الألوان :</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span><span data-t="leg_good">جيدة — لا بلاغات معلقة</span></span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span><span data-t="leg_warn">تحذير — 1-2 بلاغ معلق</span></span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span><span data-t="leg_danger">خطر — +3 بلاغات معلقة</span></span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--gray-300)"></span><span data-t="leg_idle">غير نشطة</span></span>
+    </div>
+
+    <div id="roomsContainer" class="rooms-grid"></div>
+  </div>
+</div>
+
+<!-- ══ ADD/EDIT MODAL ══ -->
+<div class="modal-overlay" id="formModal" onclick="closeOnBg(event,'formModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="formTitle">إضافة قاعة</h3>
+      <span class="modal-close" onclick="closeModal('formModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId" />
+      <div class="form-group">
+        <label class="form-label" data-t="lbl_type">نوع القاعة</label>
+        <div class="type-selector">
+          <div class="type-opt selected-td" id="optTD" onclick="selectType('TD')">TD</div>
+          <div class="type-opt" id="optTP" onclick="selectType('TP')">TP</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-t="lbl_number">رقم القاعة</label>
+          <input type="number" class="form-input" id="roomNumber" min="1" max="99" placeholder="01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-t="lbl_capacity">السعة (مقاعد)</label>
+          <input type="number" class="form-input" id="roomCapacity" min="1" max="200" placeholder="30" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="lbl_floor">الطابق</label>
+        <select class="form-input" id="roomFloor">
+          <option value="0" data-t="floor0">الطابق الأرضي</option>
+          <option value="1" data-t="floor1">الطابق الأول</option>
+          <option value="2" data-t="floor2">الطابق الثاني</option>
+          <option value="3" data-t="floor3">الطابق الثالث</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="lbl_active">حالة التفعيل</label>
+        <select class="form-input" id="roomActive">
+          <option value="1" data-t="act_yes">نشطة</option>
+          <option value="0" data-t="act_no">غير نشطة</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-lg outline" onclick="closeModal('formModal')" data-t="btn_cancel">إلغاء</button>
+      <button class="btn-lg primary" id="btnSave" onclick="saveRoom()" data-t="btn_save">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DELETE ══ -->
+<div class="modal-overlay" id="confirmModal" onclick="closeOnBg(event,'confirmModal')">
+  <div class="modal" style="width:360px">
+    <div class="modal-header">
+      <h3 data-t="confirm_title">تأكيد الحذف</h3>
+      <span class="modal-close" onclick="closeModal('confirmModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-icon">🗑️</div>
+      <p class="confirm-msg" id="confirmMsg"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-lg outline" onclick="closeModal('confirmModal')" data-t="btn_cancel">إلغاء</button>
+      <button class="btn-lg danger" id="btnDelete" onclick="confirmDelete()" data-t="btn_delete">حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<!-- ══ FIREBASE ══ -->
+<script type="module">
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs,
+         addDoc, updateDoc, deleteDoc,
+         doc, serverTimestamp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ─── YOUR FIREBASE CONFIG ─── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCoI_lFR8-8cnmO1AoekiHqsMcFMMRmyAU",       
+  authDomain:        "signalapp-c3761.firebaseapp.com",          
+  projectId:         "signalapp-c3761",
+  storageBucket:     "signalapp-c3761.firebasestorage.app",
+  messagingSenderId: "350012140438",
+  appId:             "1:350012140438:web:8e942284fc02ade9288bb7"           
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const roomsCol = collection(db, "rooms");
+
+/* ─── Expose to non-module script ─── */
+window._db = {
+  async loadAll() {
+    const snap = await getDocs(roomsCol);
+    /* Map each Firestore doc → our room shape */
+    return snap.docs.map(d => {
+      const data = d.data();
+      return {
+        firestoreId: d.id,                              // keep the real Firestore ID
+        type:        data.type     || 'TD',
+        num:         data.num      || '01',
+        capacity:    data.capacity || 30,
+        floor:       data.floor    ?? 0,
+        active:      data.active   ?? true,
+        reports: {
+          pending:    data.reports?.pending    ?? 0,
+          inprogress: data.reports?.inprogress ?? 0,
+          done:       data.reports?.done       ?? 0,
+        }
+      };
+    });
+  },
+
+  async add(roomData) {
+    const ref = await addDoc(roomsCol, {
+      ...roomData,
+      createdAt: serverTimestamp()
+    });
+    return ref.id;
+  },
+
+  async update(firestoreId, roomData) {
+    await updateDoc(doc(db, "rooms", firestoreId), {
+      ...roomData,
+      updatedAt: serverTimestamp()
+    });
+  },
+
+  async remove(firestoreId) {
+    await deleteDoc(doc(db, "rooms", firestoreId));
+  }
+};
+
+/* ─── Bootstrap: load rooms then init UI ─── */
+try {
+  const loaded = await window._db.loadAll();
+  window._rooms = loaded;          // hand off to non-module script
+} catch(err) {
+  console.error("Firestore load error:", err);
+  window._rooms = [];
+  window._firestoreError = err.message;
+}
+window._firebaseReady = true;
+document.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<!-- ══ APP LOGIC ══ -->
+<script>
+/* ════════════════════════════
+   TRANSLATIONS
+════════════════════════════ */
+const T = {
+  ar:{
+    page_title:"🏫 إدارة القاعات",
+    sb_title:"منصة الصيانة", sb_sub:"مجمع الإعلام الآلي",
+    nav_main:"القائمة", nav_follow:"المتابعة",
+    nav_reports:"البلاغات", nav_rooms:"القاعات",
+    nav_stats:"الإحصائيات", nav_log:"سجل العمليات",
+    user_name:"مسؤول الصيانة", user_role:"مشرف أول",
+    add_room:"إضافة قاعة",
+    sum_total:"إجمالي القاعات", sum_good:"بحالة جيدة",
+    sum_warn:"تحتاج متابعة", sum_danger:"في خطر",
+    fil_all:"الكل", fil_good:"جيدة", fil_warn:"تحذير", fil_danger:"خطر",
+    legend_title:"دلالة الألوان :",
+    leg_good:"جيدة — لا بلاغات معلقة",
+    leg_warn:"تحذير — 1-2 بلاغ معلق",
+    leg_danger:"خطر — +3 بلاغات معلقة",
+    leg_idle:"غير نشطة",
+    lbl_type:"نوع القاعة", lbl_number:"رقم القاعة",
+    lbl_capacity:"السعة (مقاعد)", lbl_floor:"الطابق",
+    lbl_active:"حالة التفعيل",
+    floor0:"الطابق الأرضي", floor1:"الطابق الأول",
+    floor2:"الطابق الثاني", floor3:"الطابق الثالث",
+    act_yes:"نشطة", act_no:"غير نشطة",
+    btn_cancel:"إلغاء", btn_save:"حفظ", btn_delete:"حذف",
+    confirm_title:"تأكيد الحذف",
+    confirm_msg:"هل تريد حذف القاعة {name}؟ لا يمكن التراجع.",
+    form_add:"إضافة قاعة جديدة", form_edit:"تعديل القاعة",
+    status_good:"حالة جيدة", status_warn:"تحتاج متابعة",
+    status_danger:"حالة خطرة", status_idle:"غير نشطة",
+    lbl_pending:"معلق", lbl_inprog:"جارٍ", lbl_done:"مكتمل",
+    lbl_total:"إجمالي", lbl_floor_s:"الطابق", lbl_capacity_s:"المقاعد",
+    toast_added:"✅ تمت إضافة القاعة بنجاح",
+    toast_edited:"✏️ تم تعديل القاعة بنجاح",
+    toast_deleted:"🗑️ تم حذف القاعة",
+    toast_nav:"📌 الصفحة قيد التطوير",
+    toast_error:"❌ حدث خطأ، يرجى المحاولة مجدداً",
+    err_num:"يرجى إدخال رقم القاعة",
+    search_ph:"بحث عن قاعة...",
+    loading:"جارٍ التحميل...",
+    saving:"جارٍ الحفظ..."
+  },
+  fr:{
+    page_title:"🏫 Gestion des Salles",
+    sb_title:"Maintenance", sb_sub:"Complexe Informatique",
+    nav_main:"MENU", nav_follow:"SUIVI",
+    nav_reports:"Signalements", nav_rooms:"Salles",
+    nav_stats:"Statistiques", nav_log:"Journal",
+    user_name:"Responsable", user_role:"Superviseur",
+    add_room:"Ajouter une salle",
+    sum_total:"Total des salles", sum_good:"En bon état",
+    sum_warn:"À surveiller", sum_danger:"En danger",
+    fil_all:"Tout", fil_good:"Bon état", fil_warn:"Avertissement", fil_danger:"Danger",
+    legend_title:"Code couleur :",
+    leg_good:"Bon — aucun signalement en attente",
+    leg_warn:"Attention — 1-2 signalements en attente",
+    leg_danger:"Danger — +3 signalements en attente",
+    leg_idle:"Inactive",
+    lbl_type:"Type de salle", lbl_number:"Numéro",
+    lbl_capacity:"Capacité (places)", lbl_floor:"Étage",
+    lbl_active:"Statut",
+    floor0:"Rez-de-chaussée", floor1:"1er étage",
+    floor2:"2ème étage", floor3:"3ème étage",
+    act_yes:"Active", act_no:"Inactive",
+    btn_cancel:"Annuler", btn_save:"Enregistrer", btn_delete:"Supprimer",
+    confirm_title:"Confirmer la suppression",
+    confirm_msg:"Voulez-vous supprimer la salle {name} ? Cette action est irréversible.",
+    form_add:"Ajouter une salle", form_edit:"Modifier la salle",
+    status_good:"Bon état", status_warn:"À surveiller",
+    status_danger:"En danger", status_idle:"Inactive",
+    lbl_pending:"En attente", lbl_inprog:"En cours", lbl_done:"Terminé",
+    lbl_total:"Total", lbl_floor_s:"Étage", lbl_capacity_s:"Places",
+    toast_added:"✅ Salle ajoutée avec succès",
+    toast_edited:"✏️ Salle modifiée avec succès",
+    toast_deleted:"🗑️ Salle supprimée",
+    toast_nav:"📌 Page en cours de développement",
+    toast_error:"❌ Une erreur s'est produite",
+    err_num:"Veuillez saisir le numéro de la salle",
+    search_ph:"Rechercher une salle...",
+    loading:"Chargement...",
+    saving:"Enregistrement..."
+  },
+  en:{
+    page_title:"🏫 Room Management",
+    sb_title:"Maintenance Panel", sb_sub:"CS Complex",
+    nav_main:"MENU", nav_follow:"TRACKING",
+    nav_reports:"Reports", nav_rooms:"Rooms",
+    nav_stats:"Statistics", nav_log:"Activity Log",
+    user_name:"Maintenance Manager", user_role:"Head Supervisor",
+    add_room:"Add Room",
+    sum_total:"Total Rooms", sum_good:"In Good Condition",
+    sum_warn:"Need Attention", sum_danger:"Dangerous",
+    fil_all:"All", fil_good:"Good", fil_warn:"Warning", fil_danger:"Danger",
+    legend_title:"Color legend:",
+    leg_good:"Good — no pending reports",
+    leg_warn:"Warning — 1-2 pending reports",
+    leg_danger:"Danger — 3+ pending reports",
+    leg_idle:"Inactive",
+    lbl_type:"Room Type", lbl_number:"Room Number",
+    lbl_capacity:"Capacity (seats)", lbl_floor:"Floor",
+    lbl_active:"Status",
+    floor0:"Ground Floor", floor1:"1st Floor",
+    floor2:"2nd Floor", floor3:"3rd Floor",
+    act_yes:"Active", act_no:"Inactive",
+    btn_cancel:"Cancel", btn_save:"Save", btn_delete:"Delete",
+    confirm_title:"Confirm Deletion",
+    confirm_msg:"Are you sure you want to delete room {name}? This cannot be undone.",
+    form_add:"Add New Room", form_edit:"Edit Room",
+    status_good:"Good Condition", status_warn:"Needs Attention",
+    status_danger:"Dangerous", status_idle:"Inactive",
+    lbl_pending:"Pending", lbl_inprog:"In Progress", lbl_done:"Done",
+    lbl_total:"Total", lbl_floor_s:"Floor", lbl_capacity_s:"Seats",
+    toast_added:"✅ Room added successfully",
+    toast_edited:"✏️ Room updated successfully",
+    toast_deleted:"🗑️ Room deleted",
+    toast_nav:"📌 Page under development",
+    toast_error:"❌ An error occurred, please try again",
+    err_num:"Please enter the room number",
+    search_ph:"Search rooms...",
+    loading:"Loading...",
+    saving:"Saving..."
+  }
+};
+
+let lang = 'ar';
+function t(key){ return T[lang][key] || key; }
+
+function setLang(l){
+  lang = l;
+  document.documentElement.lang  = l==='ar' ? 'ar' : 'en';
+  document.documentElement.dir   = l==='ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  applyTranslations();
+  renderRooms();
+}
+
+function applyTranslations(){
+  document.getElementById('page-title').textContent   = t('page_title');
+  document.getElementById('sb-title').textContent     = t('sb_title');
+  document.getElementById('sb-sub').textContent       = t('sb_sub');
+  document.getElementById('nav-main-lbl').textContent = t('nav_main');
+  document.getElementById('nav-follow-lbl').textContent = t('nav_follow');
+  document.getElementById('searchInput').placeholder  = t('search_ph');
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const key = el.dataset.t;
+    if(key) el.textContent = t(key);
+  });
+  ['floor0','floor1','floor2','floor3'].forEach((k,i)=>{
+    const opt = document.querySelector(`#roomFloor option[value="${i}"]`);
+    if(opt) opt.textContent = t(k);
+  });
+  const actY = document.querySelector('#roomActive option[value="1"]');
+  const actN = document.querySelector('#roomActive option[value="0"]');
+  if(actY) actY.textContent = t('act_yes');
+  if(actN) actN.textContent = t('act_no');
+}
+
+/* ════════════════════════════
+   STATE
+════════════════════════════ */
+let rooms = [];          // populated after Firebase loads
+let currentFilter = 'all';
+let currentView   = 'grid';
+let pendingDeleteId = null;   // firestoreId of room pending deletion
+let selectedType  = 'TD';
+
+/* ════════════════════════════
+   STATUS LOGIC
+════════════════════════════ */
+function getRoomStatus(room){
+  if(!room.active) return 'idle';
+  const p = room.reports.pending;
+  if(p === 0)  return 'good';
+  if(p <= 2)   return 'warn';
+  return 'danger';
+}
+function getBarClass(s){ return {good:'bar-green',warn:'bar-yellow',danger:'bar-red',idle:'bar-gray'}[s]; }
+function getPillClass(s){ return {good:'pill-good',warn:'pill-warn',danger:'pill-danger',idle:'pill-idle'}[s]; }
+function getStatusLabel(s){ return {good:t('status_good'),warn:t('status_warn'),danger:t('status_danger'),idle:t('status_idle')}[s]; }
+function getPillDot(s){
+  const c = {good:'var(--green)',warn:'var(--yellow)',danger:'var(--red)',idle:'var(--gray-400)'};
+  return `<span class="pill-dot" style="background:${c[s]}"></span>`;
+}
+
+/* ════════════════════════════
+   SUMMARY
+════════════════════════════ */
+function updateSummary(){
+  const active = rooms.filter(r=>r.active);
+  document.getElementById('sum-total').textContent  = rooms.length;
+  document.getElementById('sum-good').textContent   = active.filter(r=>getRoomStatus(r)==='good').length;
+  document.getElementById('sum-warn').textContent   = active.filter(r=>getRoomStatus(r)==='warn').length;
+  document.getElementById('sum-danger').textContent = active.filter(r=>getRoomStatus(r)==='danger').length;
+  document.getElementById('pendingBadge').textContent = rooms.reduce((a,r)=>a+r.reports.pending, 0);
+}
+
+/* ════════════════════════════
+   RENDER
+════════════════════════════ */
+function renderRooms(){
+  const search = (document.getElementById('searchInput').value||'').toLowerCase();
+  const filtered = rooms.filter(r=>{
+    const name = `${r.type} ${r.num}`.toLowerCase();
+    const matchSearch = !search || name.includes(search);
+    const status = getRoomStatus(r);
+    const matchFilter =
+      currentFilter==='all' ||
+      currentFilter===r.type ||
+      currentFilter===status;
+    return matchSearch && matchFilter;
+  });
+
+  const container = document.getElementById('roomsContainer');
+  container.className = currentView==='grid' ? 'rooms-grid' : 'rooms-list';
+
+  if(!filtered.length){
+    container.innerHTML = `<div class="empty-grid"><div class="ei">🏫</div><p>${lang==='ar'?'لا توجد قاعات':'No rooms found'}</p></div>`;
+    updateSummary();
+    return;
+  }
+
+  if(currentView==='grid'){
+    container.innerHTML = filtered.map((r,i)=>roomCardHTML(r,i)).join('');
+  } else {
+    container.innerHTML = filtered.map(r=>roomRowHTML(r)).join('');
+  }
+  updateSummary();
+}
+
+function floorLabel(f){ return t(`floor${f}`); }
+
+function roomCardHTML(r, i){
+  const status = getRoomStatus(r);
+  const total  = r.reports.pending + r.reports.inprogress + r.reports.done;
+  // Use firestoreId as the key for actions
+  const fid = r.firestoreId;
+  return `
+  <div class="room-card" style="animation-delay:${i*0.04}s">
+    <div class="room-color-bar ${getBarClass(status)}"></div>
+    <div class="room-card-body">
+      <div class="room-header">
+        <div class="room-name-row">
+          <span class="room-type-badge type-${r.type}">${r.type}</span>
+          <span class="room-name">${r.num}</span>
+        </div>
+        <div class="room-actions">
+          <div class="icon-action" onclick="openEditModal('${fid}')" title="تعديل">✏️</div>
+          <div class="icon-action del" onclick="openDeleteModal('${fid}')" title="حذف">🗑️</div>
+        </div>
+      </div>
+      <div class="status-pill ${getPillClass(status)}">
+        ${getPillDot(status)}${getStatusLabel(status)}
+      </div>
+      <div class="room-stats">
+        <div class="r-stat pending"><div class="rv">${r.reports.pending}</div><div class="rl">${t('lbl_pending')}</div></div>
+        <div class="r-stat inprog"><div class="rv">${r.reports.inprogress}</div><div class="rl">${t('lbl_inprog')}</div></div>
+        <div class="r-stat done"><div class="rv">${r.reports.done}</div><div class="rl">${t('lbl_done')}</div></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:12px;font-size:11.5px;color:var(--gray-500);font-weight:600">
+        <span>🏢 ${floorLabel(r.floor)}</span>
+        <span>🪑 ${r.capacity} ${t('lbl_capacity_s')}</span>
+        <span>📋 ${total} ${t('lbl_total')}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function roomRowHTML(r){
+  const status = getRoomStatus(r);
+  const colors = {good:'var(--green)',warn:'var(--yellow)',danger:'var(--red)',idle:'var(--gray-300)'};
+  const total  = r.reports.pending + r.reports.inprogress + r.reports.done;
+  const fid = r.firestoreId;
+  return `
+  <div class="room-row">
+    <div class="status-bar-mini" style="background:${colors[status]}"></div>
+    <span class="row-name">${r.type} ${r.num}</span>
+    <span class="row-type"><span class="room-type-badge type-${r.type.toLowerCase()}">${r.type}</span></span>
+    <span class="row-status">
+      <span class="status-pill ${getPillClass(status)}" style="margin:0">
+        ${getPillDot(status)} ${getStatusLabel(status)}
+      </span>
+    </span>
+    <div class="row-counts">
+      <div class="count-item p"><div class="cv">${r.reports.pending}</div><div class="cl">${t('lbl_pending')}</div></div>
+      <div class="count-item i"><div class="cv">${r.reports.inprogress}</div><div class="cl">${t('lbl_inprog')}</div></div>
+      <div class="count-item d"><div class="cv">${r.reports.done}</div><div class="cl">${t('lbl_done')}</div></div>
+      <div class="count-item"><div class="cv" style="color:var(--gray-700)">${total}</div><div class="cl">${t('lbl_total')}</div></div>
+    </div>
+    <span style="font-size:11.5px;color:var(--gray-500);font-weight:600">🏢 ${floorLabel(r.floor)} · 🪑${r.capacity}</span>
+    <div class="row-actions">
+      <div class="icon-action" onclick="openEditModal('${fid}')">✏️</div>
+      <div class="icon-action del" onclick="openDeleteModal('${fid}')">🗑️</div>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════
+   FILTER / VIEW
+════════════════════════════ */
+function setFilter(el, f){
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = f;
+  renderRooms();
+}
+
+function setView(v){
+  currentView = v;
+  document.getElementById('gridBtn').classList.toggle('active', v==='grid');
+  document.getElementById('listBtn').classList.toggle('active', v==='list');
+  renderRooms();
+}
+
+/* ════════════════════════════
+   FORM MODAL
+════════════════════════════ */
+function selectType(tp){
+  selectedType = tp;
+  document.getElementById('optTD').className = 'type-opt' + (tp==='TD'?' selected-td':'');
+  document.getElementById('optTP').className = 'type-opt' + (tp==='TP'?' selected-tp':'');
+}
+
+function openAddModal(){
+  document.getElementById('editId').value       = '';
+  document.getElementById('formTitle').textContent = t('form_add');
+  document.getElementById('roomNumber').value   = '';
+  document.getElementById('roomCapacity').value = '30';
+  document.getElementById('roomFloor').value    = '0';
+  document.getElementById('roomActive').value   = '1';
+  selectType('TD');
+  document.getElementById('formModal').classList.add('open');
+}
+
+function openEditModal(firestoreId){
+  const r = rooms.find(x=>x.firestoreId===firestoreId);
+  if(!r) return;
+  document.getElementById('editId').value          = firestoreId;
+  document.getElementById('formTitle').textContent = `${t('form_edit')} — ${r.type} ${r.num}`;
+  document.getElementById('roomNumber').value      = parseInt(r.num);
+  document.getElementById('roomCapacity').value    = r.capacity;
+  document.getElementById('roomFloor').value       = r.floor;
+  document.getElementById('roomActive').value      = r.active ? '1' : '0';
+  selectType(r.type);
+  document.getElementById('formModal').classList.add('open');
+}
+
+async function saveRoom(){
+  const num = document.getElementById('roomNumber').value.trim();
+  if(!num){ showToast(t('err_num')); return; }
+
+  const roomData = {
+    type:     selectedType,
+    num:      num.padStart(2,'0'),
+    capacity: parseInt(document.getElementById('roomCapacity').value) || 30,
+    floor:    parseInt(document.getElementById('roomFloor').value)    || 0,
+    active:   document.getElementById('roomActive').value === '1',
+  };
+
+  const editId = document.getElementById('editId').value;
+  const btn    = document.getElementById('btnSave');
+
+  btn.disabled = true;
+  btn.textContent = t('saving');
+
+  try {
+    if(editId){
+      /* UPDATE existing doc — keep existing reports */
+      await window._db.update(editId, roomData);
+
+      /* Update local array */
+      const idx = rooms.findIndex(x=>x.firestoreId===editId);
+      if(idx !== -1){
+        rooms[idx] = { ...rooms[idx], ...roomData };
+      }
+      showToast(t('toast_edited'));
+    } else {
+      /* ADD new doc — reports start at zero */
+      const fullData = {
+        ...roomData,
+        reports: { pending:0, inprogress:0, done:0 }
+      };
+      const newId = await window._db.add(fullData);
+
+      /* Push to local array */
+      rooms.push({ firestoreId: newId, ...fullData });
+      showToast(t('toast_added'));
+    }
+    closeModal('formModal');
+    renderRooms();
+  } catch(err){
+    console.error("Save error:", err);
+    showToast(t('toast_error'), true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t('btn_save');
+  }
+}
+
+/* ════════════════════════════
+   DELETE
+════════════════════════════ */
+function openDeleteModal(firestoreId){
+  const r = rooms.find(x=>x.firestoreId===firestoreId);
+  if(!r) return;
+  pendingDeleteId = firestoreId;
+  document.getElementById('confirmMsg').textContent =
+    t('confirm_msg').replace('{name}', `${r.type} ${r.num}`);
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+async function confirmDelete(){
+  if(!pendingDeleteId) return;
+  const btn = document.getElementById('btnDelete');
+  btn.disabled = true;
+
+  try {
+    await window._db.remove(pendingDeleteId);
+    rooms = rooms.filter(r => r.firestoreId !== pendingDeleteId);
+    pendingDeleteId = null;
+    closeModal('confirmModal');
+    showToast(t('toast_deleted'));
+    renderRooms();
+  } catch(err){
+    console.error("Delete error:", err);
+    showToast(t('toast_error'), true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ════════════════════════════
+   MODAL HELPERS
+════════════════════════════ */
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeOnBg(e,id){ if(e.target===document.getElementById(id)) closeModal(id); }
+
+/* ════════════════════════════
+   TOAST
+════════════════════════════ */
+function showToast(msg, isError=false){
+  const el = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.toggle('error', isError);
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+/* ════════════════════════════
+   NAV
+════════════════════════════ */
+function navGo(el, page){
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  if(page!=='rooms') showToast(t('toast_nav'));
+}
+
+/* ════════════════════════════
+   INIT — wait for Firebase
+════════════════════════════ */
+applyTranslations();
+
+document.addEventListener('firebase-ready', ()=>{
+  rooms = window._rooms || [];
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+
+  if(window._firestoreError){
+    showToast('❌ ' + window._firestoreError, true);
+  }
+
+  renderRooms();
+});
+</script>
+</body>
+</html>
