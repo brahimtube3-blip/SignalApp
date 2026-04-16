@@ -1,42 +1,765 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة الصيانة — جامعة لغواط</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563eb;--blue-l:#3b82f6;--blue-d:#1d4ed8;--blue-pale:#eff6ff;
+  --green:#22c55e;--green-p:#f0fdf4;
+  --red:#ef4444;--red-p:#fef2f2;
+  --yellow:#eab308;
+  --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;--g300:#cbd5e1;
+  --g400:#94a3b8;--g500:#64748b;--g700:#334155;--g900:#0f172a;
+  --white:#ffffff;
+  --shadow:0 4px 20px rgba(37,99,235,.12);
+  --r:14px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Cairo',sans-serif;background:var(--g50);min-height:100vh;display:flex;align-items:stretch;color:var(--g900);overflow:hidden;}
+
+/* LEFT PANEL */
+.lp{width:44%;background:linear-gradient(150deg,#0f2d6b 0%,var(--blue-d) 40%,var(--blue) 75%,var(--blue-l) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 44px;position:relative;overflow:hidden;flex-shrink:0;}
+[dir=ltr] .lp{order:2;}
+.dc{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.07);}
+.dc.a{width:200px;height:200px;top:-60px;right:-60px;background:rgba(255,255,255,.04);}
+.dc.b{width:340px;height:340px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.dc.c{width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(255,255,255,.03);}
+.dc.d{width:120px;height:120px;bottom:-40px;left:-30px;background:rgba(255,255,255,.04);}
+.brand{position:relative;z-index:1;text-align:center;width:100%;max-width:340px;}
+.logo-box{width:90px;height:90px;background:rgba(255,255,255,.13);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.28);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 32px rgba(0,0,0,.2);overflow:hidden;padding:8px;}
+.logo-box img{width:100%;height:100%;object-fit:contain;filter:brightness(0) invert(1);}
+.bt1{color:#fff;font-size:22px;font-weight:900;line-height:1.3;margin-bottom:6px;}
+.bt2{color:rgba(255,255,255,.58);font-size:12.5px;font-weight:500;line-height:1.7;margin-bottom:36px;}
+.fl-list{display:flex;flex-direction:column;gap:11px;width:100%;}
+.fi-t{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:11px 14px;animation:slideIn .5s ease both;}
+[dir=ltr] .fi-t{animation-name:slideInL;}
+@keyframes slideIn{from{opacity:0;transform:translateX(18px);}to{opacity:1;transform:none;}}
+@keyframes slideInL{from{opacity:0;transform:translateX(-18px);}to{opacity:1;transform:none;}}
+.fi-t:nth-child(2){animation-delay:.1s;}.fi-t:nth-child(3){animation-delay:.2s;}
+.fic{font-size:19px;width:26px;text-align:center;flex-shrink:0;}
+.fit{color:rgba(255,255,255,.85);font-size:13px;font-weight:600;}
+.lp-ft{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:rgba(255,255,255,.3);font-size:11.5px;font-weight:500;}
+
+/* RIGHT PANEL */
+.rp{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;background:var(--white);position:relative;}
+[dir=ltr] .rp{order:1;}
+
+/* TOP BAR */
+.top-bar{position:absolute;top:0;left:0;right:0;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g100);}
+.mtabs{display:flex;background:var(--g100);border-radius:9px;padding:3px;gap:2px;}
+.mtab{padding:6px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;color:var(--g500);transition:all .18s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+.mtab.active{background:var(--white);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.lsw{display:flex;background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:3px;gap:2px;}
+.lb{padding:5px 11px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;color:var(--g500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+.lb.active{background:var(--white);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* FORM BOX */
+.fbox{width:100%;max-width:400px;animation:fadeUp .38s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.fhead{margin-bottom:22px;}
+.fh-top{font-size:12.5px;font-weight:600;color:var(--blue);margin-bottom:5px;}
+.fh-h2{font-size:21px;font-weight:900;color:var(--g900);margin-bottom:5px;}
+.fh-p{font-size:13px;color:var(--g500);line-height:1.6;}
+
+/* STEPS */
+.steps{display:flex;align-items:center;margin-bottom:22px;}
+.stp{display:flex;align-items:center;gap:7px;flex:1;}
+.sdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;border:2px solid var(--g200);background:var(--white);color:var(--g400);transition:all .3s;flex-shrink:0;}
+.sdot.active{border-color:var(--blue);background:var(--blue);color:#fff;}
+.sdot.done{border-color:var(--green);background:var(--green);color:#fff;}
+.sline{flex:1;height:2px;background:var(--g200);transition:background .3s;}
+.sline.done{background:var(--green);}
+.slbl{font-size:10.5px;font-weight:700;color:var(--g400);white-space:nowrap;}
+.slbl.active{color:var(--blue);}.slbl.done{color:var(--green);}
+
+/* VIEWS */
+.vw{display:none;}.vw.active{display:block;}
+
+/* INPUTS */
+.fg{margin-bottom:15px;}
+.fl{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--g700);margin-bottom:6px;}
+.iw{position:relative;}
+.ii{position:absolute;top:50%;transform:translateY(-50%);font-size:15px;color:var(--g400);right:13px;pointer-events:none;}
+[dir=ltr] .ii{right:auto;left:13px;}
+.finp{width:100%;border:1.5px solid var(--g200);border-radius:var(--rs);padding:10.5px 38px 10.5px 14px;font-size:13.5px;font-family:'Cairo',sans-serif;color:var(--g900);outline:none;transition:all .2s;background:var(--white);}
+[dir=ltr] .finp{padding:10.5px 14px 10.5px 38px;}
+.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.finp.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.07);}
+.finp.ok{border-color:var(--green);}
+.finp::placeholder{color:var(--g300);}
+/* email split */
+.ecmb{display:flex;border:1.5px solid var(--g200);border-radius:var(--rs);overflow:hidden;transition:all .2s;}
+.ecmb:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.ecmb.err{border-color:var(--red);}.ecmb.ok{border-color:var(--green);}
+.ep{flex:1;border:none;outline:none;padding:10.5px 10px 10.5px 6px;font-size:13.5px;font-family:'Cairo',sans-serif;color:var(--g900);background:transparent;}
+[dir=ltr] .ep{padding:10.5px 6px 10.5px 10px;}
+.ep::placeholder{color:var(--g300);}
+.esfx{display:flex;align-items:center;padding:0 11px;background:var(--g50);border-right:1.5px solid var(--g200);font-size:12px;font-weight:700;color:var(--g500);white-space:nowrap;flex-shrink:0;}
+[dir=ltr] .esfx{border-right:none;border-left:1.5px solid var(--g200);}
+/* pw eye */
+.pwe{position:absolute;top:50%;transform:translateY(-50%);left:11px;cursor:pointer;color:var(--g400);font-size:15px;background:none;border:none;padding:2px;line-height:1;}
+[dir=ltr] .pwe{left:auto;right:11px;}
+.pwe:hover{color:var(--g700);}
+/* strength */
+.strb{margin-top:7px;}
+.strk{height:4px;background:var(--g100);border-radius:99px;overflow:hidden;margin-bottom:4px;}
+.strf{height:100%;border-radius:99px;transition:all .3s;width:0%;}
+.strl{font-size:11px;font-weight:700;}
+/* field msg */
+.fm{font-size:11.5px;margin-top:5px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.fm.e{color:var(--red);}.fm.h{color:var(--g400);}.fm.g{color:var(--green);}
+/* phone */
+.phrow{display:flex;gap:8px;}
+.phcode{width:88px;flex-shrink:0;border:1.5px solid var(--g200);border-radius:var(--rs);padding:10px 8px;font-size:13px;font-family:'Cairo',sans-serif;color:var(--g900);outline:none;background:var(--g50);transition:border .2s;}
+.phcode:focus{border-color:var(--blue);}
+
+/* DIVIDER */
+.dvl{display:flex;align-items:center;gap:10px;margin:14px 0;}
+.dvl::before,.dvl::after{content:'';flex:1;height:1px;background:var(--g200);}
+.dvl span{font-size:11.5px;color:var(--g400);font-weight:600;white-space:nowrap;}
+
+/* GOOGLE BTN */
+.btn-g{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border:1.5px solid var(--g200);border-radius:var(--rs);background:var(--white);cursor:pointer;font-family:'Cairo',sans-serif;font-size:13.5px;font-weight:700;color:var(--g700);transition:all .15s;}
+.btn-g:hover{background:var(--g50);border-color:var(--g300);box-shadow:var(--shadow);}
+.gsv{width:19px;height:19px;flex-shrink:0;}
+
+/* ROW SM */
+.rowsm{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ckw{display:flex;align-items:center;gap:7px;cursor:pointer;}
+.ckw input{accent-color:var(--blue);width:14px;height:14px;cursor:pointer;}
+.ckw span{font-size:12.5px;font-weight:600;color:var(--g500);}
+.lnk{font-size:12.5px;font-weight:700;color:var(--blue);cursor:pointer;background:none;border:none;font-family:'Cairo',sans-serif;}
+.lnk:hover{text-decoration:underline;}
+
+/* BUTTONS */
+.btn-p{width:100%;padding:12px;border-radius:var(--rs);background:var(--blue);color:#fff;border:none;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;}
+.btn-p:hover:not(:disabled){background:var(--blue-d);transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.28);}
+.btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.btn-p.ld .bt{opacity:0;}
+.btn-p .sp{position:absolute;width:19px;height:19px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.btn-p.ld .sp{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.btn-s{width:100%;padding:10px;border-radius:var(--rs);background:transparent;color:var(--g700);border:1.5px solid var(--g200);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;margin-top:8px;}
+.btn-s:hover{background:var(--g50);}
+
+/* ERROR BANNER */
+.ebanner{background:var(--red-p);border:1px solid #fca5a5;border-radius:10px;padding:11px 14px;font-size:13px;font-weight:600;color:#991b1b;margin-bottom:14px;display:none;align-items:center;gap:8px;}
+.ebanner.show{display:flex;}
+
+/* SUCCESS */
+.sscr{text-align:center;padding:24px 0;animation:fadeUp .4s ease both;}
+.sico{font-size:52px;margin-bottom:14px;}
+.sscr h3{font-size:18px;font-weight:900;color:var(--g900);margin-bottom:7px;}
+.sscr p{font-size:13.5px;color:var(--g500);line-height:1.7;}
+.ptrk{height:4px;width:200px;margin:20px auto 0;background:var(--g200);border-radius:99px;overflow:hidden;}
+.pfil{height:100%;background:var(--blue);border-radius:99px;width:0%;transition:width 2s linear;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:#fff;padding:11px 20px;border-radius:11px;font-size:13px;font-weight:600;z-index:500;display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:90vw;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* GOOGLE MODAL */
+.gov{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:300;display:none;align-items:center;justify-content:center;}
+.gov.open{display:flex;}
+.gmod{background:var(--white);border-radius:18px;width:370px;max-width:95vw;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2);animation:popIn .22s ease;}
+@keyframes popIn{from{transform:translateY(18px) scale(.97);opacity:0;}to{transform:none;opacity:1;}}
+.gmhd{padding:16px 20px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:10px;}
+.gmhd h3{font-size:14px;font-weight:800;flex:1;}
+.gmx{cursor:pointer;font-size:18px;color:var(--g400);}
+.gmx:hover{color:var(--g900);}
+.gmbd{padding:20px;}
+.gminf{background:var(--blue-pale);border:1px solid #bfdbfe;border-radius:9px;padding:12px;font-size:12.5px;color:var(--blue-d);font-weight:600;line-height:1.6;margin-bottom:14px;}
+.gmacs{display:flex;flex-direction:column;gap:8px;}
+.gmac{display:flex;align-items:center;gap:11px;padding:11px;border:1.5px solid var(--g200);border-radius:9px;cursor:pointer;transition:all .15s;}
+.gmac:hover{border-color:var(--blue);background:var(--blue-pale);}
+.gmac.inv{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.gaav{width:34px;height:34px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0;}
+.ganm{font-size:13px;font-weight:700;color:var(--g900);}
+.gaem{font-size:11.5px;color:var(--g500);}
+.gaarr{margin-right:auto;font-size:18px;color:var(--green);}
+[dir=ltr] .gaarr{margin-right:unset;margin-left:auto;}
+.gmft{padding:12px 20px;border-top:1px solid var(--g100);font-size:11.5px;color:var(--g400);text-align:center;font-weight:500;}
+
+/* LOADING OVERLAY */
+.lov{position:fixed;inset:0;background:rgba(255,255,255,.88);backdrop-filter:blur(2px);z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.lov.show{display:flex;}
+.lospin{width:40px;height:40px;border:3px solid var(--g200);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;}
+.lotxt{font-size:13px;font-weight:600;color:var(--g500);}
+
+/* VERIFY BOX */
+.vbox{background:var(--blue-pale);border:1px solid #bfdbfe;border-radius:12px;padding:18px;text-align:center;margin-bottom:16px;}
+.vbox-ico{font-size:38px;margin-bottom:8px;}
+.vbox-em{font-size:13px;font-weight:700;color:var(--blue-d);}
+.vbox-hint{font-size:12px;color:var(--g500);margin-top:6px;}
+
+@media(max-width:820px){
+  body{overflow:auto;}
+  .lp{display:none;}
+  .rp{padding:24px 16px;}
+  .fbox{max-width:100%;}
+  .top-bar{padding:12px 16px;}
+}
+</style>
 </head>
 <body>
-    <h1>Login Page</h1>
-    <form id="login-form" onsubmit="return handleLogin(event)">
-        <input type="text" id="username" placeholder="Username" required />
-        <input type="password" id="password" placeholder="Password" required />
-        <button type="submit">Login</button>
-    </form>
 
-    <script>
-    async function handleLogin(event) {
-        event.preventDefault();
+<!-- ═══ LEFT PANEL ═══ -->
+<div class="lp">
+  <div class="dc a"></div><div class="dc b"></div><div class="dc c"></div><div class="dc d"></div>
+  <div class="brand">
+    <div class="logo-box">
+      <img src="data:image/jpeg;base64,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" alt="شعار جامعة لغواط">
+    </div>
+    <div class="bt1" id="lp-t">منصة الصيانة الجامعية</div>
+    <div class="bt2" id="lp-s">نظام إدارة بلاغات الصيانة لمجمع الإعلام الآلي — جامعة عمار ثليجي الأغواط</div>
+    <div class="fl-list">
+      <div class="fi-t"><span class="fic">📋</span><span class="fit" data-k="f1">رفع البلاغات بسرعة وسهولة</span></div>
+      <div class="fi-t"><span class="fic">🔔</span><span class="fit" data-k="f2">إشعارات فورية عند حل المشكل</span></div>
+      <div class="fi-t"><span class="fic">🏆</span><span class="fit" data-k="f3">نقاط وترتيب لأفضل المبلّغين</span></div>
+    </div>
+  </div>
+  <div class="lp-ft" id="lp-ft">© جامعة عمار ثليجي — الأغواط 2025</div>
+</div>
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+<!-- ═══ RIGHT PANEL ═══ -->
+<div class="rp">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="mtabs">
+      <button class="mtab active" id="tab-l" onclick="setMode('login')" data-k="tab_login">تسجيل الدخول</button>
+      <button class="mtab" id="tab-r" onclick="setMode('reg')" data-k="tab_reg">إنشاء حساب</button>
+    </div>
+    <div class="lsw">
+      <button class="lb active" onclick="setLang('ar')">ع</button>
+      <button class="lb" onclick="setLang('fr')">FR</button>
+      <button class="lb" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 
-        // Fixed authentication logic
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+  <!-- ══ LOGIN ══ -->
+  <div class="fbox" id="box-l">
+    <div class="ebanner" id="le"><span>❌</span><span id="le-m"></span></div>
+    <div class="fhead">
+      <div class="fh-top" data-k="welcome">مرحباً بك 👋</div>
+      <div class="fh-h2" data-k="login_title">تسجيل الدخول</div>
+      <div class="fh-p" data-k="login_sub">استخدم بريدك الجامعي للوصول إلى المنصة</div>
+    </div>
+    <button class="btn-g" onclick="openGMod()">
+      <svg class="gsv" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <span data-k="google_btn">تسجيل سريع بـ Google</span>
+    </button>
+    <div class="dvl"><span data-k="or">أو بالبريد الجامعي</span></div>
+    <div class="fg">
+      <label class="fl"><span data-k="lbl_email">البريد الجامعي</span></label>
+      <div class="ecmb" id="lEG">
+        <input type="text" class="ep" id="lE" placeholder="ah.safi.inf" autocomplete="username" oninput="vEmail('l')"/>
+        <span class="esfx">@lagh-univ.dz</span>
+      </div>
+      <div class="fm h" id="lEM"><span>💡</span><span data-k="email_hint">مثال: prenom.nom.dep@lagh-univ.dz</span></div>
+    </div>
+    <div class="fg">
+      <label class="fl">
+        <span data-k="lbl_pw">كلمة المرور</span>
+        <button class="lnk" onclick="forgotPw()" data-k="forgot">نسيت كلمة المرور؟</button>
+      </label>
+      <div class="iw">
+        <span class="ii">🔒</span>
+        <input type="password" class="finp" id="lP" placeholder="••••••••" autocomplete="current-password" dir="ltr" style="text-align:left;padding-right:38px;padding-left:36px;" oninput="vPw('l')"/>
+        <button class="pwe" onclick="tPw('lP',this)">👁️</button>
+      </div>
+      <div class="fm" id="lPM" style="display:none"></div>
+    </div>
+    <div class="rowsm">
+      <label class="ckw"><input type="checkbox" id="rem"><span data-k="remember">تذكرني</span></label>
+    </div>
+    <button class="btn-p" id="lBtn" onclick="doLogin()">
+      <span class="bt" data-k="btn_login">تسجيل الدخول</span><div class="sp"></div>
+    </button>
+  </div>
 
-        if (response.ok) {
-            // Session management
-            const { token } = await response.json();
-            localStorage.setItem('authToken', token);
-            // Proper OTP to dashboard redirect
-            window.location.href = '/dashboard';
-        } else {
-            alert('Login failed! Please check your credentials.');
-        }
+  <!-- ══ REGISTER ══ -->
+  <div class="fbox" id="box-r" style="display:none">
+    <div class="steps">
+      <div class="stp"><div class="sdot active" id="d1">1</div><div class="sline" id="l1"></div><span class="slbl active" id="s1" data-k="step_info">معلومات الحساب</span></div>
+      <div class="stp"><div class="sdot" id="d2">2</div><div class="sline" id="l2"></div><span class="slbl" id="s2" data-k="step_verify">التحقق</span></div>
+      <div class="stp"><div class="sdot" id="d3">✓</div><span class="slbl" id="s3" data-k="step_done">تم</span></div>
+    </div>
+    <!-- View 1 -->
+    <div class="vw active" id="v1">
+      <div class="ebanner" id="re"><span>❌</span><span id="re-m"></span></div>
+      <div class="fhead">
+        <div class="fh-top" data-k="reg_welcome">أهلاً بك 🎓</div>
+        <div class="fh-h2" data-k="reg_title">إنشاء حساب جديد</div>
+        <div class="fh-p" data-k="reg_sub">أدخل بياناتك للانضمام إلى منصة الصيانة</div>
+      </div>
+      <button class="btn-g" onclick="openGMod()">
+        <svg class="gsv" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        <span data-k="google_btn">تسجيل سريع بـ Google</span>
+      </button>
+      <div class="dvl"><span data-k="or">أو أدخل بياناتك</span></div>
+      <div class="fg">
+        <label class="fl"><span data-k="lbl_name">الاسم الكامل</span></label>
+        <div class="iw"><span class="ii">👤</span>
+          <input type="text" class="finp" id="rN" style="padding-right:38px;padding-left:14px;" placeholder="Ahmed Safi" autocomplete="name"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl"><span data-k="lbl_email">البريد الجامعي</span></label>
+        <div class="ecmb" id="rEG">
+          <input type="text" class="ep" id="rE" placeholder="ah.safi.inf" autocomplete="email" oninput="vEmail('r')"/>
+          <span class="esfx">@lagh-univ.dz</span>
+        </div>
+        <div class="fm h" id="rEM"><span>💡</span><span data-k="email_hint">مثال: prenom.nom.dep@lagh-univ.dz</span></div>
+      </div>
+      <div class="fg">
+        <label class="fl"><span data-k="lbl_pw">كلمة المرور</span></label>
+        <div class="iw"><span class="ii">🔒</span>
+          <input type="password" class="finp" id="rP" placeholder="••••••••" autocomplete="new-password" dir="ltr" style="text-align:left;padding-right:38px;padding-left:36px;" oninput="vPw('r')"/>
+          <button class="pwe" onclick="tPw('rP',this)">👁️</button>
+        </div>
+        <div class="strb" id="rSB" style="display:none"><div class="strk"><div class="strf" id="rSF"></div></div><div class="strl" id="rSL"></div></div>
+        <div class="fm" id="rPM" style="display:none"></div>
+      </div>
+      <div class="fg">
+        <label class="fl"><span data-k="lbl_phone">رقم الهاتف</span></label>
+        <div class="phrow">
+          <select class="phcode" id="rPC"><option value="+213">🇩🇿 +213</option><option value="+33">🇫🇷 +33</option><option value="+1">🇺🇸 +1</option><option value="+44">🇬🇧 +44</option></select>
+          <div class="iw" style="flex:1"><span class="ii">📱</span>
+            <input type="tel" class="finp" id="rPH" placeholder="0550 000 000" style="padding-right:38px;padding-left:14px;" maxlength="13" oninput="vPhone()"/>
+          </div>
+        </div>
+        <div class="fm h" id="rPHM"><span>💡</span><span data-k="phone_hint">سيُستخدم للتواصل معك</span></div>
+      </div>
+      <button class="btn-p" id="rBtn" onclick="doReg()">
+        <span class="bt" data-k="btn_next">التالي</span><div class="sp"></div>
+      </button>
+    </div>
+    <!-- View 2 -->
+    <div class="vw" id="v2">
+      <div class="fhead">
+        <div class="fh-top">📧</div>
+        <div class="fh-h2" data-k="verify_title">تحقق من بريدك</div>
+        <div class="fh-p" data-k="verify_sub">تم إرسال رابط التحقق إلى بريدك. افتحه وانقر على الرابط ثم عد هنا.</div>
+      </div>
+      <div class="vbox">
+        <div class="vbox-ico">📬</div>
+        <div class="vbox-em" id="vEM"></div>
+        <div class="vbox-hint" data-k="check_spam">تحقق من مجلد البريد غير المرغوب إذا لم يصلك</div>
+      </div>
+      <button class="btn-p" id="cvBtn" onclick="checkVerify()"><span class="bt" data-k="btn_check_verify">لقد تحققت، تابع</span><div class="sp"></div></button>
+      <button class="btn-s" onclick="resendVerify()" data-k="btn_resend_email">إعادة إرسال البريد</button>
+      <button class="btn-s" onclick="goRV(1)" data-k="btn_back">← العودة</button>
+    </div>
+    <!-- View 3 -->
+    <div class="vw" id="v3">
+      <div class="sscr"><div class="sico">🎉</div>
+        <h3 data-k="success_title">تم إنشاء الحساب!</h3>
+        <p data-k="success_sub_reg">تم التسجيل بنجاح. جاري تحميل لوحة التحكم...</p>
+        <div class="ptrk"><div class="pfil" id="pF"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOGIN SUCCESS ══ -->
+  <div class="fbox" id="box-s" style="display:none">
+    <div class="sscr"><div class="sico">🎉</div>
+      <h3 data-k="success_title_login">تم تسجيل الدخول!</h3>
+      <p data-k="success_sub_login">مرحباً بك. جاري تحميل المنصة...</p>
+      <div class="ptrk"><div class="pfil" id="pFL"></div></div>
+    </div>
+  </div>
+</div><!-- /rp -->
+
+<!-- Google account modal -->
+<div class="gov" id="gov" onclick="closeGBg(event)">
+  <div class="gmod">
+    <div class="gmhd">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <h3 data-k="gm_title">اختيار حساب Google</h3>
+      <span class="gmx" onclick="closeGMod()">✕</span>
+    </div>
+    <div class="gmbd">
+      <div class="gminf" data-k="gm_info">🔒 يُسمح فقط بالحسابات الجامعية التي تنتهي بـ @lagh-univ.dz</div>
+      <div class="gmacs">
+        <div class="gmac" onclick="doGoogle()">
+          <div class="gaav">ص</div>
+          <div><div class="ganm">صافي أحمد تجاني</div><div class="gaem">ah.safi.inf@lagh-univ.dz ✅</div></div>
+          <span class="gaarr">›</span>
+        </div>
+        <div class="gmac inv">
+          <div class="gaav" style="background:var(--g300)">م</div>
+          <div><div class="ganm" style="color:var(--g400)">حساب شخصي</div><div class="gaem">myemail@gmail.com ❌</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="gmft" data-k="gm_note">فقط البريد الجامعي @lagh-univ.dz مقبول</div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="lov" id="lov"><div class="lospin"></div><div class="lotxt" data-k="loading">جاري الاتصال...</div></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="tM"></span></div>
+
+<!-- ══ FIREBASE MODULE ══ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendEmailVerification, signInWithPopup, GoogleAuthProvider,
+  sendPasswordResetEmail, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ══ CONFIG — replace with your real values ══ */
+const cfg = {
+  apiKey: "AIzaSyDflKZh4hG6qP4HKJ9wfYNKrYrbD0dKWUA",
+  authDomain: "signalclass-f4a9b.firebaseapp.com",
+  projectId: "signalclass-f4a9b",
+  storageBucket: "signalclass-f4a9b.firebasestorage.app",
+  messagingSenderId: "389086461310",
+  appId: "1:389086461310:web:7be448a3efa31b2cc3072f",
+  measurementId: "G-YKE7YLJV7E"
+};
+
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const gp   = new GoogleAuthProvider();
+gp.setCustomParameters({ hd: 'lagh-univ.dz', prompt:'select_account' });
+
+/* Expose to window */
+window._auth   = auth;
+window._db     = db;
+window._gp     = gp;
+window._sts    = serverTimestamp;
+
+window._login  = (e,p)=>signInWithEmailAndPassword(auth,e,p);
+window._reg    = (e,p)=>createUserWithEmailAndPassword(auth,e,p);
+window._verify = (u)=>sendEmailVerification(u);
+window._reload = async(u)=>{ await u.reload(); return auth.currentUser; };
+window._glogin = ()=>signInWithPopup(auth,gp);
+window._resetPw= (e)=>sendPasswordResetEmail(auth,e);
+window._saveU  = (uid,d)=>setDoc(doc(db,'users',uid),d,{merge:true});
+
+onAuthStateChanged(auth, u=>{ window._cu=u; });
+window._fbOK=true;
+document.dispatchEvent(new Event('fbReady'));
+</script>
+
+<!-- ══ MAIN LOGIC ══ -->
+<script>
+/* ── Translations ── */
+const T={
+ar:{
+  lp_t:"منصة الصيانة الجامعية",
+  lp_s:"نظام إدارة بلاغات الصيانة لمجمع الإعلام الآلي — جامعة عمار ثليجي الأغواط",
+  lp_f:"© جامعة عمار ثليجي — الأغواط 2025",
+  f1:"رفع البلاغات بسرعة وسهولة",f2:"إشعارات فورية عند حل المشكل",f3:"نقاط وترتيب لأفضل المبلّغين",
+  tab_login:"تسجيل الدخول",tab_reg:"إنشاء حساب",
+  welcome:"مرحباً بك 👋",login_title:"تسجيل الدخول",login_sub:"استخدم بريدك الجامعي للوصول إلى المنصة",
+  google_btn:"تسجيل سريع بـ Google",or:"أو بالبريد الجامعي",
+  lbl_email:"البريد الجامعي",email_hint:"مثال: prenom.nom.dep@lagh-univ.dz",
+  lbl_pw:"كلمة المرور",forgot:"نسيت كلمة المرور؟",remember:"تذكرني",btn_login:"تسجيل الدخول",
+  reg_welcome:"أهلاً بك 🎓",reg_title:"إنشاء حساب جديد",reg_sub:"أدخل بياناتك للانضمام",
+  lbl_name:"الاسم الكامل",lbl_phone:"رقم الهاتف",phone_hint:"سيُستخدم للتواصل معك",
+  btn_next:"التالي",step_info:"معلومات الحساب",step_verify:"التحقق",step_done:"تم",
+  verify_title:"تحقق من بريدك",verify_sub:"تم إرسال رابط التحقق. افتح البريد ثم عد هنا.",
+  check_spam:"تحقق من البريد غير المرغوب إن لم يصلك",
+  btn_check_verify:"لقد تحققت، تابع",btn_resend_email:"إعادة إرسال البريد",btn_back:"← العودة",
+  success_title:"تم إنشاء الحساب!",success_sub_reg:"تم التسجيل بنجاح. جاري التحميل...",
+  success_title_login:"تم تسجيل الدخول!",success_sub_login:"مرحباً بك. جاري التحميل...",
+  gm_title:"اختيار حساب Google",
+  gm_info:"🔒 يُسمح فقط بالحسابات الجامعية @lagh-univ.dz",
+  gm_note:"فقط البريد الجامعي @lagh-univ.dz مقبول",loading:"جاري الاتصال...",
+  e_empty_email:"يرجى إدخال اسم المستخدم",e_email_chars:"استخدم أحرفاً لاتينية فقط",
+  ok_email:"✓ بريد صالح",e_pw_short:"كلمة المرور قصيرة (8 أحرف كحد أدنى)",
+  e_name:"يرجى إدخال الاسم الكامل",e_phone:"يرجى إدخال رقم هاتف صحيح",
+  e_not_verified:"يرجى التحقق من بريدك أولاً",e_google_domain:"❌ يُسمح فقط بالبريد الجامعي @lagh-univ.dz",
+  s_weak:"ضعيفة",s_med:"متوسطة",s_strong:"قوية",
+  e_wrong_pw:"كلمة المرور غير صحيحة",e_no_user:"البريد غير مسجّل",
+  e_many:"محاولات كثيرة، حاول لاحقاً",e_used:"هذا البريد مستخدم بالفعل",e_gen:"حدث خطأ، حاول مجدداً",
+  t_verify:"📧 تم إرسال بريد التحقق",t_pw:"📧 تم إرسال رابط إعادة التعيين",
+  t_google:"✅ تم الدخول بـ Google بنجاح",t_need_verify:"⚠️ يجب التحقق من بريدك أولاً",
+},
+fr:{
+  lp_t:"Plateforme de Maintenance",
+  lp_s:"Gestion des signalements — Complexe Informatique, Université Amar Telidji Laghouat",
+  lp_f:"© Université Amar Telidji — Laghouat 2025",
+  f1:"Signaler rapidement",f2:"Notifications instantanées",f3:"Points et classement",
+  tab_login:"Connexion",tab_reg:"Inscription",
+  welcome:"Bienvenue 👋",login_title:"Se connecter",login_sub:"Utilisez votre email universitaire",
+  google_btn:"Connexion rapide Google",or:"Ou avec l'email universitaire",
+  lbl_email:"Email universitaire",email_hint:"Ex : prenom.nom.dep@lagh-univ.dz",
+  lbl_pw:"Mot de passe",forgot:"Mot de passe oublié ?",remember:"Se souvenir",btn_login:"Se connecter",
+  reg_welcome:"Bienvenue 🎓",reg_title:"Créer un compte",reg_sub:"Entrez vos informations",
+  lbl_name:"Nom complet",lbl_phone:"Téléphone",phone_hint:"Pour vous contacter",
+  btn_next:"Suivant",step_info:"Informations",step_verify:"Vérification",step_done:"Terminé",
+  verify_title:"Vérifiez votre email",verify_sub:"Lien envoyé. Cliquez dessus puis revenez.",
+  check_spam:"Vérifiez les spams",btn_check_verify:"J'ai vérifié, continuer",
+  btn_resend_email:"Renvoyer l'email",btn_back:"← Retour",
+  success_title:"Compte créé !",success_sub_reg:"Inscription réussie. Chargement...",
+  success_title_login:"Connexion réussie !",success_sub_login:"Bienvenue. Chargement...",
+  gm_title:"Choisir un compte Google",gm_info:"🔒 Seuls les comptes @lagh-univ.dz",
+  gm_note:"Seul l'email universitaire est accepté",loading:"Connexion...",
+  e_empty_email:"Saisissez le nom d'utilisateur",e_email_chars:"Caractères latins uniquement",
+  ok_email:"✓ Email valide",e_pw_short:"Mot de passe trop court (8 car.)",
+  e_name:"Saisissez votre nom complet",e_phone:"Numéro invalide",
+  e_not_verified:"Vérifiez votre email d'abord",e_google_domain:"❌ Seul @lagh-univ.dz accepté",
+  s_weak:"Faible",s_med:"Moyen",s_strong:"Fort",
+  e_wrong_pw:"Mot de passe incorrect",e_no_user:"Email non enregistré",
+  e_many:"Trop de tentatives",e_used:"Email déjà utilisé",e_gen:"Erreur, réessayez",
+  t_verify:"📧 Email envoyé",t_pw:"📧 Lien envoyé",t_google:"✅ Connexion Google OK",
+  t_need_verify:"⚠️ Vérifiez votre email d'abord",
+},
+en:{
+  lp_t:"University Maintenance Platform",
+  lp_s:"Report management — CS Complex, Amar Telidji University Laghouat",
+  lp_f:"© Amar Telidji University — Laghouat 2025",
+  f1:"Submit reports quickly",f2:"Instant notifications",f3:"Points & ranking",
+  tab_login:"Sign In",tab_reg:"Register",
+  welcome:"Welcome 👋",login_title:"Sign In",login_sub:"Use your university email",
+  google_btn:"Quick sign-in with Google",or:"Or with university email",
+  lbl_email:"University email",email_hint:"Example: firstname.lastname.dep@lagh-univ.dz",
+  lbl_pw:"Password",forgot:"Forgot password?",remember:"Remember me",btn_login:"Sign In",
+  reg_welcome:"Welcome 🎓",reg_title:"Create Account",reg_sub:"Enter your details to join",
+  lbl_name:"Full name",lbl_phone:"Phone number",phone_hint:"For contact purposes",
+  btn_next:"Next",step_info:"Account Info",step_verify:"Verify",step_done:"Done",
+  verify_title:"Verify your email",verify_sub:"Link sent. Click it then return here.",
+  check_spam:"Check spam if you don't receive it",btn_check_verify:"I've verified, continue",
+  btn_resend_email:"Resend email",btn_back:"← Back",
+  success_title:"Account created!",success_sub_reg:"Registration successful. Loading...",
+  success_title_login:"Signed in!",success_sub_login:"Welcome. Loading platform...",
+  gm_title:"Choose a Google account",gm_info:"🔒 Only @lagh-univ.dz accounts allowed",
+  gm_note:"Only university email is accepted",loading:"Connecting...",
+  e_empty_email:"Please enter your username",e_email_chars:"Latin characters only",
+  ok_email:"✓ Valid email",e_pw_short:"Password too short (8 chars min)",
+  e_name:"Please enter your full name",e_phone:"Invalid phone number",
+  e_not_verified:"Please verify your email first",e_google_domain:"❌ Only @lagh-univ.dz accepted",
+  s_weak:"Weak",s_med:"Medium",s_strong:"Strong",
+  e_wrong_pw:"Incorrect password",e_no_user:"Email not registered",
+  e_many:"Too many attempts",e_used:"Email already in use",e_gen:"Error, please retry",
+  t_verify:"📧 Verification email sent",t_pw:"📧 Reset link sent",
+  t_google:"✅ Google sign-in successful",t_need_verify:"⚠️ Please verify your email first",
+},
+};
+
+let lang='ar';
+const t=k=>(T[lang]&&T[lang][k])||T.ar[k]||k;
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l==='ar'?'ar':'en';
+  document.documentElement.dir=l==='ar'?'rtl':'ltr';
+  document.querySelectorAll('.lb').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.lb[onclick="setLang('${l}')"]`).classList.add('active');
+  applyT();
+}
+function applyT(){
+  document.getElementById('lp-t').textContent=t('lp_t');
+  document.getElementById('lp-s').textContent=t('lp_s');
+  document.getElementById('lp-ft').textContent=t('lp_f');
+  document.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;if(k)el.textContent=t(k);});
+}
+
+/* ── Mode ── */
+function setMode(m){
+  document.getElementById('tab-l').classList.toggle('active',m==='login');
+  document.getElementById('tab-r').classList.toggle('active',m==='reg');
+  document.getElementById('box-l').style.display=m==='login'?'block':'none';
+  document.getElementById('box-r').style.display=m==='reg'?'block':'none';
+  document.getElementById('box-s').style.display='none';
+  hidE('l');hidE('r');
+}
+
+/* ── Validation ── */
+function vEmail(s){
+  const eid=s==='l'?'lE':'rE', gid=s==='l'?'lEG':'rEG', mid=s==='l'?'lEM':'rEM';
+  const v=document.getElementById(eid).value.trim();
+  const g=document.getElementById(gid), m=document.getElementById(mid);
+  if(!v){g.className='ecmb';m.className='fm h';m.innerHTML=`<span>💡</span><span>${t('email_hint')}</span>`;return false;}
+  if(/[^\w.\-]/i.test(v)){g.className='ecmb err';m.className='fm e';m.innerHTML=`<span>❌</span>${t('e_email_chars')}`;return false;}
+  g.className='ecmb ok';m.className='fm g';m.innerHTML=`<span>✓</span>${t('ok_email')}`;return true;
+}
+function vPw(s){
+  if(s==='l'){
+    const v=document.getElementById('lP').value, m=document.getElementById('lPM');
+    if(v&&v.length<8){m.style.display='flex';m.className='fm e';m.innerHTML=`<span>❌</span>${t('e_pw_short')}`;return false;}
+    m.style.display='none';return v.length>=8;
+  } else {
+    const v=document.getElementById('rP').value;
+    const sb=document.getElementById('rSB'),sf=document.getElementById('rSF'),sl=document.getElementById('rSL'),m=document.getElementById('rPM');
+    if(!v){sb.style.display='none';m.style.display='none';return false;}
+    sb.style.display='block';
+    if(v.length<8){m.style.display='flex';m.className='fm e';m.innerHTML=`<span>❌</span>${t('e_pw_short')}`;
+      sf.style.width='25%';sf.style.background='var(--red)';sl.textContent=t('s_weak');sl.style.color='var(--red)';return false;}
+    m.style.display='none';
+    const sc=(v.length>=12?1:0)+(/[A-Z]/.test(v)?1:0)+(/[0-9]/.test(v)?1:0)+(/[^a-zA-Z0-9]/.test(v)?1:0);
+    if(sc<=2){sf.style.width='55%';sf.style.background='var(--yellow)';sl.textContent=t('s_med');sl.style.color='var(--yellow)';}
+    else{sf.style.width='100%';sf.style.background='var(--green)';sl.textContent=t('s_strong');sl.style.color='var(--green)';}
+    return true;
+  }
+}
+function vPhone(){
+  const v=document.getElementById('rPH').value.replace(/\s/g,''), m=document.getElementById('rPHM');
+  if(v.length>=9&&/^\d+$/.test(v)){m.className='fm g';m.innerHTML=`<span>✓</span>${t('ok_email')}`;return true;}
+  m.className='fm h';m.innerHTML=`<span>💡</span>${t('phone_hint')}`;return false;
+}
+function tPw(id,btn){
+  const i=document.getElementById(id);
+  if(i.type==='password'){i.type='text';btn.textContent='🙈';}else{i.type='password';btn.textContent='👁️';}
+}
+
+/* ── Errors ── */
+function shE(form,msg){const b=document.getElementById(form+'e'),m=document.getElementById(form+'e-m');if(b&&m){m.textContent=msg;b.classList.add('show');}}
+function hidE(form){const b=document.getElementById(form+'e');if(b)b.classList.remove('show');}
+function fbE(code){
+  return({
+    'auth/wrong-password':t('e_wrong_pw'),'auth/invalid-credential':t('e_wrong_pw'),
+    'auth/user-not-found':t('e_no_user'),'auth/too-many-requests':t('e_many'),
+    'auth/email-already-in-use':t('e_used'),
+  })[code]||t('e_gen');
+}
+
+/* ── LOGIN ── */
+async function doLogin(){
+  hidE('l');
+  const eu=document.getElementById('lE').value.trim(), pw=document.getElementById('lP').value;
+  if(!eu){shE('l',t('e_empty_email'));return;}
+  if(!/^[\w.\-]+$/i.test(eu)){shE('l',t('e_email_chars'));return;}
+  if(!pw||pw.length<8){shE('l',t('e_pw_short'));return;}
+  setLd(true,'lBtn');showLov(true);
+  try{
+    const c=await window._login(eu+'@lagh-univ.dz',pw);
+    if(!c.user.emailVerified){setLd(false,'lBtn');showLov(false);shE('l',t('e_not_verified'));return;}
+    showLoginOK();
+  }catch(e){setLd(false,'lBtn');showLov(false);shE('l',fbE(e.code));}
+}
+
+/* ── REGISTER ── */
+async function doReg(){
+  hidE('r');
+  const name=document.getElementById('rN').value.trim();
+  const eu=document.getElementById('rE').value.trim();
+  const pw=document.getElementById('rP').value;
+  const phone=document.getElementById('rPH').value.trim();
+  if(!name){shE('r',t('e_name'));return;}
+  if(!eu||!/^[\w.\-]+$/i.test(eu)){shE('r',t('e_empty_email'));return;}
+  if(!pw||pw.length<8){shE('r',t('e_pw_short'));return;}
+  setLd(true,'rBtn');showLov(true);
+  try{
+    const email=eu+'@lagh-univ.dz';
+    const c=await window._reg(email,pw);
+    await window._verify(c.user);
+    await window._saveU(c.user.uid,{
+      name,email,phone,role:'student',points:0,reports:0,createdAt:window._sts()
+    });
+    document.getElementById('vEM').textContent=email;
+    setLd(false,'rBtn');showLov(false);
+    showToast(t('t_verify'));
+    goRV(2);
+  }catch(e){setLd(false,'rBtn');showLov(false);shE('r',fbE(e.code));}
+}
+
+function goRV(n){
+  [1,2,3].forEach(i=>{ document.getElementById('v'+i).className='vw'+(i===n?' active':''); });
+  for(let i=1;i<=3;i++){
+    const d=document.getElementById('d'+i), l=document.getElementById('s'+i);
+    if(i<n){d.className='sdot done';d.textContent='✓';l.className='slbl done';}
+    else if(i===n){d.className='sdot active';d.textContent=i;l.className='slbl active';}
+    else{d.className='sdot';d.textContent=i;l.className='slbl';}
+    if(i<3){const ln=document.getElementById('l'+i);if(ln)ln.className='sline'+(i<n?' done':'');}
+  }
+}
+
+async function checkVerify(){
+  setLd(true,'cvBtn');showLov(true);
+  try{
+    const u=window._auth&&window._auth.currentUser;
+    if(!u){setLd(false,'cvBtn');showLov(false);showToast(t('t_need_verify'));return;}
+    const r=await window._reload(u);
+    if(r&&r.emailVerified){setLd(false,'cvBtn');showLov(false);showRegOK();}
+    else{setLd(false,'cvBtn');showLov(false);showToast(t('t_need_verify'));}
+  }catch(e){setLd(false,'cvBtn');showLov(false);showToast(t('e_gen'));}
+}
+
+async function resendVerify(){
+  try{const u=window._auth&&window._auth.currentUser;if(u)await window._verify(u);showToast(t('t_verify'));}
+  catch(e){showToast(t('e_gen'));}
+}
+
+/* ── FORGOT PW ── */
+async function forgotPw(){
+  const eu=document.getElementById('lE').value.trim();
+  if(!eu||!/^[\w.\-]+$/i.test(eu)){showToast('⚠️ '+t('e_empty_email'));return;}
+  showLov(true);
+  try{await window._resetPw(eu+'@lagh-univ.dz');showLov(false);showToast(t('t_pw'));}
+  catch(e){showLov(false);showToast(fbE(e.code));}
+}
+
+/* ── GOOGLE ── */
+function openGMod(){document.getElementById('gov').classList.add('open');}
+function closeGMod(){document.getElementById('gov').classList.remove('open');}
+function closeGBg(e){if(e.target===document.getElementById('gov'))closeGMod();}
+
+async function doGoogle(){
+  closeGMod();showLov(true);
+  try{
+    const r=await window._glogin();
+    const u=r.user;
+    if(!u.email.endsWith('@lagh-univ.dz')){
+      showLov(false);showToast(t('e_google_domain'));
+      await window._auth.signOut();return;
     }
-    </script>
+    await window._saveU(u.uid,{name:u.displayName||'',email:u.email,photo:u.photoURL||'',role:'student',updatedAt:window._sts()});
+    showLov(false);showToast(t('t_google'));
+    setTimeout(redirect,800);
+  }catch(e){
+    showLov(false);
+    if(e.code!=='auth/popup-closed-by-user')showToast(t('e_gen'));
+  }
+}
+
+/* ── SUCCESS ── */
+function redirect(){window.location.href='maintenance_app.html';}
+
+function showLoginOK(){
+  showLov(false);
+  document.getElementById('box-l').style.display='none';
+  document.getElementById('box-s').style.display='block';
+  setTimeout(()=>{document.getElementById('pFL').style.width='100%';},100);
+  setTimeout(redirect,2300);
+}
+function showRegOK(){
+  goRV(3);
+  setTimeout(()=>{document.getElementById('pF').style.width='100%';},100);
+  setTimeout(redirect,2300);
+}
+
+/* ── UI UTILS ── */
+function setLd(on,id){
+  const b=document.getElementById(id);if(!b)return;
+  if(on){b.classList.add('ld');b.disabled=true;}else{b.classList.remove('ld');b.disabled=false;}
+}
+function showLov(on){document.getElementById('lov').classList.toggle('show',on);}
+let tT=null;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  document.getElementById('tM').textContent=msg;
+  el.classList.add('show');clearTimeout(tT);
+  tT=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+/* ── INIT ── */
+applyT();
+</script>
+
 </body>
 </html>
