@@ -5,631 +5,235 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة تحكم الصيانة — مجمع الإعلام الآلي</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-
-
-
-
 <style>
   :root {
-    --blue: #2563eb;
-    --blue-light: #3b82f6;
-    --blue-dark: #1d4ed8;
-    --blue-pale: #eff6ff;
-    --blue-border: #bfdbfe;
-    --gold: #f59e0b;
-    --green: #22c55e;
-    --yellow: #eab308;
-    --red: #ef4444;
-    --gray-50: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-500: #64748b;
-    --gray-700: #334155;
-    --gray-900: #0f172a;
-    --white: #ffffff;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
-    --shadow: 0 4px 16px rgba(37,99,235,.10);
-    --shadow-lg: 0 8px 32px rgba(37,99,235,.15);
-    --radius: 14px;
-    --radius-sm: 9px;
+    --blue:#2563eb; --blue-light:#3b82f6; --blue-dark:#1d4ed8;
+    --blue-pale:#eff6ff; --blue-border:#bfdbfe;
+    --gold:#f59e0b; --green:#22c55e; --yellow:#eab308; --red:#ef4444;
+    --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+    --gray-300:#cbd5e1; --gray-400:#94a3b8; --gray-500:#64748b;
+    --gray-700:#334155; --gray-900:#0f172a; --white:#ffffff;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+    --shadow:0 4px 16px rgba(37,99,235,.10);
+    --shadow-lg:0 8px 32px rgba(37,99,235,.15);
+    --radius:14px; --radius-sm:9px;
   }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Cairo',sans-serif;background:var(--gray-50);color:var(--gray-900);min-height:100vh;display:flex;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--gray-50);
-    color: var(--gray-900);
-    min-height: 100vh;
-    display: flex;
-  }
+  /* ── Loading ── */
+  .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .3s;}
+  .loading-overlay.hidden{opacity:0;pointer-events:none;}
+  .spinner{width:44px;height:44px;border:4px solid var(--blue-border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-text{font-size:14px;font-weight:700;color:var(--gray-500);}
 
   /* ── Sidebar ── */
-  .sidebar {
-    width: 240px;
-    background: var(--blue-dark);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 100;
-  }
-
-  .sidebar-logo {
-    padding: 28px 20px 20px;
-    border-bottom: 1px solid rgba(255,255,255,.12);
-  }
-
-  .sidebar-logo h2 {
-    color: #fff;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
-  .sidebar-logo span {
-    color: rgba(255,255,255,.55);
-    font-size: 12px;
-    font-weight: 400;
-  }
-
-  .sidebar-logo .logo-icon {
-    width: 40px; height: 40px;
-    background: rgba(255,255,255,.15);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 12px;
-    font-size: 20px;
-  }
-
-  .sidebar nav { padding: 16px 12px; flex: 1; }
-
-  .nav-label {
-    color: rgba(255,255,255,.4);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    padding: 0 8px;
-    margin: 12px 0 6px;
-    text-transform: uppercase;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    color: rgba(255,255,255,.7);
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .18s;
-    margin-bottom: 2px;
-  }
-
-  .nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-  .nav-item.active { background: rgba(255,255,255,.18); color: #fff; }
-
-  .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
-
-  .nav-badge {
-    margin-right: auto;
-    background: var(--blue-light);
-    color: #fff;
-    font-size: 10px;
-    padding: 1px 7px;
-    border-radius: 20px;
-    font-weight: 700;
-  }
-
-  .sidebar-footer {
-    padding: 16px 12px;
-    border-top: 1px solid rgba(255,255,255,.12);
-  }
-
-  .user-card {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px;
-    background: rgba(255,255,255,.08);
-    border-radius: var(--radius-sm);
-  }
-
-  .user-avatar {
-    width: 36px; height: 36px;
-    background: var(--blue-light);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 15px;
-  }
-
-  .user-info { flex: 1; overflow: hidden; }
-  .user-info .name { color: #fff; font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-info .role { color: rgba(255,255,255,.45); font-size: 11px; }
+  .sidebar{width:240px;background:var(--blue-dark);min-height:100vh;display:flex;flex-direction:column;position:fixed;right:0;top:0;bottom:0;z-index:100;}
+  [dir="ltr"] .sidebar{right:auto;left:0;}
+  .sidebar-logo{padding:28px 20px 20px;border-bottom:1px solid rgba(255,255,255,.12);}
+  .logo-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:20px;}
+  .sidebar-logo h2{color:#fff;font-size:15px;font-weight:700;line-height:1.4;}
+  .sidebar-logo span{color:rgba(255,255,255,.55);font-size:12px;}
+  .sidebar nav{padding:16px 12px;flex:1;}
+  .nav-label{color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.08em;padding:0 8px;margin:12px 0 6px;text-transform:uppercase;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);color:rgba(255,255,255,.7);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .18s;margin-bottom:2px;text-decoration:none;}
+  .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .nav-item.active{background:rgba(255,255,255,.18);color:#fff;}
+  .nav-item .icon{font-size:17px;width:22px;text-align:center;}
+  .nav-badge{margin-right:auto;background:var(--blue-light);color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700;}
+  [dir="ltr"] .nav-badge{margin-right:unset;margin-left:auto;}
+  .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.12);}
+  .user-card{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.08);border-radius:var(--radius-sm);}
+  .user-avatar{width:36px;height:36px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;}
+  .user-info .name{color:#fff;font-size:12.5px;font-weight:700;}
+  .user-info .role{color:rgba(255,255,255,.45);font-size:11px;}
 
   /* ── Main ── */
-  .main {
-    margin-right: 240px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+  .main{margin-right:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+  [dir="ltr"] .main{margin-right:0;margin-left:240px;}
 
   /* ── Topbar ── */
-  .topbar {
-    background: var(--white);
-    border-bottom: 1px solid var(--gray-200);
-    padding: 0 28px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  /* Language switcher */
+  .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 28px;height:64px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;}
+  .topbar h1{font-size:17px;font-weight:700;color:var(--gray-900);flex:1;}
+  .topbar-actions{display:flex;align-items:center;gap:10px;}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:7px 14px;}
+  .search-box input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:13px;color:var(--gray-700);outline:none;width:180px;}
   .lang-switcher{display:flex;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:8px;padding:3px;gap:2px;}
   .lang-btn{padding:5px 11px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;color:var(--gray-500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
   .lang-btn.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
-
-  .search-box{display:flex;align-items:center;gap:8px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:7px 13px;}
-  .search-box input{border:none;background:transparent;font-family:'Cairo',sans-serif;font-size:13px;color:var(--gray-700);outline:none;width:160px;}
-
-  .btn-add{display:flex;align-items:center;gap:7px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:all .15s;white-space:nowrap;}
-  .btn-add:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:var(--shadow);}
-
-
-  .topbar h1 { font-size: 17px; font-weight: 700; color: var(--gray-900); flex: 1; }
-
-  .topbar-actions { display: flex; align-items: center; gap: 10px; }
-
-  .search-box {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--gray-100);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-sm);
-    padding: 7px 14px;
-  }
-
-  .search-box input {
-    border: none; background: transparent;
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    color: var(--gray-700);
-    outline: none;
-    width: 180px;
-    direction: rtl;
-  }
-
-  .search-box input::placeholder { color: var(--gray-300); }
-
-  .icon-btn {
-    width: 38px; height: 38px;
-    border: 1px solid var(--gray-200);
-    background: var(--white);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all .15s;
-    position: relative;
-  }
-
-  .icon-btn:hover { background: var(--gray-100); }
-
-  .notif-dot {
-    position: absolute;
-    top: 7px; left: 8px;
-    width: 8px; height: 8px;
-    background: var(--red);
-    border-radius: 50%;
-    border: 2px solid #fff;
-  }
+  .icon-btn{width:38px;height:38px;border:1px solid var(--gray-200);background:var(--white);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s;position:relative;}
+  .icon-btn:hover{background:var(--gray-100);}
+  .notif-dot{position:absolute;top:7px;left:8px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff;}
 
   /* ── Content ── */
-  .content { padding: 28px; flex: 1; }
+  .content{padding:28px;flex:1;}
 
-  /* ── Stats Row ── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+  /* ── Stats ── */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .stat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow .2s;}
+  .stat-card:hover{box-shadow:var(--shadow);}
+  .stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .stat-icon.blue{background:var(--blue-pale);}
+  .stat-icon.green{background:#f0fdf4;}
+  .stat-icon.yellow{background:#fefce8;}
+  .stat-icon.red{background:#fef2f2;}
+  .stat-value{font-size:26px;font-weight:900;color:var(--gray-900);line-height:1;}
+  .stat-label{font-size:12px;color:var(--gray-500);margin-top:4px;font-weight:500;}
+  .stat-delta{font-size:11.5px;margin-top:6px;font-weight:700;}
+  .stat-delta.up{color:var(--green);}
+  .stat-delta.down{color:var(--red);}
 
-  .stat-card {
-    background: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    transition: box-shadow .2s;
-  }
+  /* ── Two-col ── */
+  .two-col{display:grid;grid-template-columns:1fr 360px;gap:20px;}
 
-  .stat-card:hover { box-shadow: var(--shadow); }
+  /* ── Card ── */
+  .card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;}
+  .card-header{padding:18px 20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;}
+  .card-header h3{font-size:14.5px;font-weight:700;flex:1;}
+  .filter-tabs{display:flex;gap:4px;background:var(--gray-100);border-radius:8px;padding:3px;}
+  .filter-tab{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--gray-500);transition:all .15s;font-family:'Cairo',sans-serif;border:none;background:transparent;}
+  .filter-tab.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
 
-  .stat-icon {
-    width: 46px; height: 46px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
+  /* ── Table ── */
+  table{width:100%;border-collapse:collapse;}
+  thead th{background:var(--gray-50);color:var(--gray-500);font-size:11.5px;font-weight:700;padding:10px 16px;text-align:right;white-space:nowrap;letter-spacing:.02em;}
+  [dir="ltr"] thead th{text-align:left;}
+  tbody tr{border-bottom:1px solid var(--gray-100);transition:background .12s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--gray-50);}
+  td{padding:13px 16px;font-size:13px;color:var(--gray-700);vertical-align:middle;}
+  .report-id{font-weight:700;color:var(--blue);font-size:12px;}
+  .room-badge{display:inline-flex;align-items:center;gap:5px;background:var(--blue-pale);color:var(--blue-dark);padding:3px 9px;border-radius:6px;font-size:11.5px;font-weight:700;}
+  .type-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:12px;font-weight:600;background:var(--gray-100);color:var(--gray-700);}
+  .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .status-badge .dot{width:6px;height:6px;border-radius:50%;}
+  .status-badge.pending{background:#fefce8;color:#854d0e;}
+  .status-badge.pending .dot{background:var(--yellow);}
+  .status-badge.inprogress{background:var(--blue-pale);color:var(--blue-dark);}
+  .status-badge.inprogress .dot{background:var(--blue);}
+  .status-badge.complete{background:#f0fdf4;color:#166534;}
+  .status-badge.complete .dot{background:var(--green);}
+  .severity-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-left:4px;}
+  [dir="ltr"] .severity-dot{margin-left:0;margin-right:4px;}
+  .action-btns{display:flex;gap:6px;}
+  .btn-sm{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Cairo',sans-serif;transition:all .15s;}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-ghost{background:var(--gray-100);color:var(--gray-700);}
+  .btn-ghost:hover{background:var(--gray-200);}
+  .btn-success{background:#dcfce7;color:#166534;}
+  .btn-success:hover{background:#bbf7d0;}
+  .btn-sm:disabled{opacity:.5;cursor:not-allowed;}
 
-  .stat-icon.blue { background: var(--blue-pale); }
-  .stat-icon.green { background: #f0fdf4; }
-  .stat-icon.yellow { background: #fefce8; }
-  .stat-icon.red { background: #fef2f2; }
+  /* ── Side ── */
+  .side-col{display:flex;flex-direction:column;gap:20px;}
+  .progress-list{padding:0 20px 16px;}
+  .progress-item{margin-bottom:18px;}
+  .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .progress-header span{font-size:12.5px;font-weight:600;color:var(--gray-700);}
+  .progress-header .count{font-size:12px;font-weight:700;color:var(--gray-500);}
+  .progress-bar{height:7px;background:var(--gray-100);border-radius:99px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:99px;transition:width .6s;}
+  .fill-blue{background:var(--blue);}
+  .fill-red{background:var(--red);}
+  .fill-yellow{background:var(--yellow);}
+  .fill-green{background:var(--green);}
 
-  .stat-info { flex: 1; }
-  .stat-value { font-size: 26px; font-weight: 900; color: var(--gray-900); line-height: 1; }
-  .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 4px; font-weight: 500; }
-  .stat-delta { font-size: 11.5px; margin-top: 6px; font-weight: 700; }
-  .stat-delta.up { color: var(--green); }
-  .stat-delta.down { color: var(--red); }
+  .leaderboard-list{padding:0 16px 16px;}
+  .leader-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;margin-bottom:6px;transition:background .12s;}
+  .leader-item:hover{background:var(--gray-50);}
+  .leader-item.gold{background:#fffbeb;}
+  .rank-icon{font-size:20px;width:26px;text-align:center;}
+  .leader-info{flex:1;}
+  .leader-name{font-size:13px;font-weight:700;color:var(--gray-900);}
+  .leader-sub{font-size:11.5px;color:var(--gray-500);}
+  .leader-points{font-size:13px;font-weight:900;color:var(--blue);}
+  .leader-item.gold .leader-points{color:var(--gold);}
 
-  /* ── Two-column ── */
-  .two-col { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
-
-  /* ── Table Card ── */
-  .card {
-    background: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .card-header {
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .card-header h3 { font-size: 14.5px; font-weight: 700; flex: 1; }
-
-  .filter-tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--gray-100);
-    border-radius: 8px;
-    padding: 3px;
-  }
-
-  .filter-tab {
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--gray-500);
-    transition: all .15s;
-    font-family: 'Cairo', sans-serif;
-  }
-
-  .filter-tab.active { background: var(--white); color: var(--blue); box-shadow: var(--shadow-sm); }
-
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    background: var(--gray-50);
-    color: var(--gray-500);
-    font-size: 11.5px;
-    font-weight: 700;
-    padding: 10px 16px;
-    text-align: right;
-    white-space: nowrap;
-    letter-spacing: .02em;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid var(--gray-100);
-    transition: background .12s;
-  }
-
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--gray-50); }
-
-  td {
-    padding: 13px 16px;
-    font-size: 13px;
-    color: var(--gray-700);
-    vertical-align: middle;
-  }
-
-  .report-id { font-weight: 700; color: var(--blue); font-size: 12px; }
-
-  .room-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--blue-pale);
-    color: var(--blue-dark);
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 700;
-  }
-
-  .type-chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    background: var(--gray-100);
-    color: var(--gray-700);
-  }
-
-  .status-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11.5px;
-    font-weight: 700;
-  }
-
-  .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
-  .status-badge.pending { background: #fefce8; color: #854d0e; }
-  .status-badge.pending .dot { background: var(--yellow); }
-  .status-badge.inprogress { background: var(--blue-pale); color: var(--blue-dark); }
-  .status-badge.inprogress .dot { background: var(--blue); }
-  .status-badge.complete { background: #f0fdf4; color: #166534; }
-  .status-badge.complete .dot { background: var(--green); }
-
-  .severity-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 4px;
-  }
-
-  .action-btns { display: flex; gap: 6px; }
-
-  .btn-sm {
-    padding: 5px 12px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    font-family: 'Cairo', sans-serif;
-    transition: all .15s;
-  }
-
-  .btn-primary { background: var(--blue); color: #fff; }
-  .btn-primary:hover { background: var(--blue-dark); }
-  .btn-ghost { background: var(--gray-100); color: var(--gray-700); }
-  .btn-ghost:hover { background: var(--gray-200); }
-  .btn-success { background: #dcfce7; color: #166534; }
-  .btn-success:hover { background: #bbf7d0; }
-
-  /* ── Side Panel ── */
-  .side-col { display: flex; flex-direction: column; gap: 20px; }
-
-  .progress-list { padding: 0 20px 16px; }
-
-  .progress-item { margin-bottom: 18px; }
-  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .progress-header span { font-size: 12.5px; font-weight: 600; color: var(--gray-700); }
-  .progress-header .count { font-size: 12px; font-weight: 700; color: var(--gray-500); }
-  .progress-bar { height: 7px; background: var(--gray-100); border-radius: 99px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 99px; transition: width .6s; }
-  .fill-blue { background: var(--blue); }
-  .fill-red { background: var(--red); }
-  .fill-yellow { background: var(--yellow); }
-  .fill-green { background: var(--green); }
-
-  .leaderboard-list { padding: 0 16px 16px; }
-
-  .leader-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 6px;
-    transition: background .12s;
-    cursor: default;
-  }
-
-  .leader-item:hover { background: var(--gray-50); }
-  .leader-item.gold { background: #fffbeb; }
-
-  .rank-icon { font-size: 20px; width: 26px; text-align: center; }
-  .leader-info { flex: 1; }
-  .leader-name { font-size: 13px; font-weight: 700; color: var(--gray-900); }
-  .leader-sub { font-size: 11.5px; color: var(--gray-500); }
-  .leader-points {
-    font-size: 13px; font-weight: 900;
-    color: var(--blue);
-  }
-
-  .leader-item.gold .leader-points { color: var(--gold); }
-
-  /* ── Modal Overlay ── */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(15,23,42,.45);
-    backdrop-filter: blur(4px);
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--white);
-    border-radius: 18px;
-    width: 480px;
-    max-width: 95vw;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,.18);
-    animation: slideIn .22s ease;
-  }
-
-  @keyframes slideIn {
-    from { transform: translateY(20px) scale(.97); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
-  }
-
-  .modal-header {
-    padding: 20px 22px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex; align-items: center; gap: 10px;
-  }
-
-  .modal-header h3 { font-size: 15px; font-weight: 700; flex: 1; }
-  .modal-close { cursor: pointer; font-size: 18px; color: var(--gray-500); }
-  .modal-close:hover { color: var(--gray-900); }
-
-  .modal-body { padding: 22px; }
-
-  .info-row {
-    display: flex; gap: 8px;
-    margin-bottom: 12px;
-    font-size: 13px;
-  }
-
-  .info-row .label { color: var(--gray-500); font-weight: 600; min-width: 90px; }
-  .info-row .value { color: var(--gray-900); font-weight: 700; flex: 1; }
-
-  .desc-box {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 13px;
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.7;
-    margin: 16px 0;
-  }
-
-  .modal-footer {
-    padding: 16px 22px;
-    border-top: 1px solid var(--gray-100);
-    display: flex; gap: 10px; justify-content: flex-end;
-  }
-
-  .btn-lg {
-    padding: 9px 22px;
-    border-radius: 10px;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    font-family: 'Cairo', sans-serif;
-    transition: all .15s;
-  }
-
-  .btn-lg.primary { background: var(--blue); color: #fff; }
-  .btn-lg.primary:hover { background: var(--blue-dark); }
-  .btn-lg.outline { background: transparent; color: var(--gray-700); border: 1.5px solid var(--gray-200); }
-  .btn-lg.outline:hover { background: var(--gray-100); }
-  .btn-lg.success { background: #22c55e; color: #fff; }
-  .btn-lg.success:hover { background: #16a34a; }
+  /* ── Modal ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:18px;width:480px;max-width:95vw;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.18);animation:slideIn .22s ease;}
+  @keyframes slideIn{from{transform:translateY(20px) scale(.97);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+  .modal-header{padding:20px 22px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;}
+  .modal-header h3{font-size:15px;font-weight:700;flex:1;}
+  .modal-close{cursor:pointer;font-size:18px;color:var(--gray-500);}
+  .modal-close:hover{color:var(--gray-900);}
+  .modal-body{padding:22px;}
+  .info-row{display:flex;gap:8px;margin-bottom:12px;font-size:13px;}
+  .info-row .label{color:var(--gray-500);font-weight:600;min-width:90px;}
+  .info-row .value{color:var(--gray-900);font-weight:700;flex:1;}
+  .desc-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:13px;font-size:13px;color:var(--gray-700);line-height:1.7;margin:16px 0;}
+  .modal-footer{padding:16px 22px;border-top:1px solid var(--gray-100);display:flex;gap:10px;justify-content:flex-end;}
+  .btn-lg{padding:9px 22px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;border:none;font-family:'Cairo',sans-serif;transition:all .15s;}
+  .btn-lg.primary{background:var(--blue);color:#fff;}
+  .btn-lg.primary:hover{background:var(--blue-dark);}
+  .btn-lg.outline{background:transparent;color:var(--gray-700);border:1.5px solid var(--gray-200);}
+  .btn-lg.outline:hover{background:var(--gray-100);}
+  .btn-lg.success{background:#22c55e;color:#fff;}
+  .btn-lg.success:hover{background:#16a34a;}
+  .btn-lg:disabled{opacity:.5;cursor:not-allowed;}
 
   /* ── Toast ── */
-  .toast {
-    position: fixed;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--gray-900);
-    color: #fff;
-    padding: 12px 22px;
-    border-radius: 12px;
-    font-size: 13.5px;
-    font-weight: 600;
-    z-index: 500;
-    display: flex; align-items: center; gap: 9px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.2);
-    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-  }
-
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast .t-icon { font-size: 16px; }
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gray-900);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:500;display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.error{background:#dc2626;}
 
   /* ── Empty ── */
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--gray-500);
-  }
+  .empty-state{text-align:center;padding:40px;color:var(--gray-500);}
+  .empty-state .e-icon{font-size:36px;margin-bottom:10px;}
+  .empty-state p{font-size:13px;}
 
-  .empty-state .e-icon { font-size: 36px; margin-bottom: 10px; }
-  .empty-state p { font-size: 13px; }
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px;}
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
-
-  @media (max-width: 1100px) {
-    .two-col { grid-template-columns: 1fr; }
-    .stats-row { grid-template-columns: repeat(2,1fr); }
-    .side-col { flex-direction: row; flex-wrap: wrap; }
-    .side-col .card { flex: 1 1 300px; }
-  }
-
-  @media (max-width: 760px) {
-    .sidebar { display: none; }
-    .main { margin-right: 0; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .content { padding: 16px; }
-  }
+  @media(max-width:1100px){.two-col{grid-template-columns:1fr;}.stats-row{grid-template-columns:repeat(2,1fr);}.side-col{flex-direction:row;flex-wrap:wrap;}.side-col .card{flex:1 1 300px;}}
+  @media(max-width:760px){.sidebar{display:none;}.main{margin-right:0!important;margin-left:0!important;}.stats-row{grid-template-columns:1fr 1fr;}.content{padding:16px;}}
 </style>
 </head>
 <body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">جارٍ تحميل البيانات...</div>
+</div>
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">🔧</div>
-    <h2>منصة الصيانة</h2>
-    <span>مجمع الإعلام الآلي</span>
+    <h2 id="sb-title">منصة الصيانة</h2>
+    <span id="sb-sub">مجمع الإعلام الآلي</span>
   </div>
   <nav>
-    <div class="nav-label">القائمة الرئيسية</div>
-    <a href="dashboard.html">
-    <div class="nav-item active" >
+    <div class="nav-label" id="nav-lbl-main">القائمة الرئيسية</div>
+    <a href="dashboard.html" class="nav-item active">
       <span class="icon">📋</span>
-      البلاغات
-      <span class="nav-badge" id="pendingBadge">5</span>
-    </div>
+      <span data-t="nav_reports">البلاغات</span>
+      <span class="nav-badge" id="pendingBadge">0</span>
     </a>
-    <a href="rooms.html">
-    <div class="nav-item">
-      
+    <a href="rooms.html" class="nav-item">
       <span class="icon">🏫</span>
-      القاعات
-    </div>
+      <span data-t="nav_rooms">القاعات</span>
     </a>
-    
-    <div class="nav-label">المتابعة</div>
-    <div class="nav-item" onclick="setPage(this,'الإحصائيات')">
+    <div class="nav-label" id="nav-lbl-follow">المتابعة</div>
+    <div class="nav-item" onclick="showToast(t('toast_wip'))">
       <span class="icon">📊</span>
-      الإحصائيات
+      <span data-t="nav_stats">الإحصائيات</span>
     </div>
-    <div class="nav-item" onclick="setPage(this,'السجل')">
+    <div class="nav-item" onclick="showToast(t('toast_wip'))">
       <span class="icon">🗂️</span>
-      سجل العمليات
+      <span data-t="nav_log">سجل العمليات</span>
     </div>
   </nav>
   <div class="sidebar-footer">
     <div class="user-card">
       <div class="user-avatar">👷</div>
       <div class="user-info">
-        <div class="name">مسؤول الصيانة</div>
-        <div class="role">مشرف أول</div>
+        <div class="name" data-t="user_name">مسؤول الصيانة</div>
+        <div class="role" data-t="user_role">مشرف أول</div>
       </div>
     </div>
   </div>
@@ -637,179 +241,120 @@
 
 <!-- ══ MAIN ══ -->
 <div class="main">
-
-  <!-- Topbar -->
   <div class="topbar">
-    
     <h1 id="pageTitle">📋 إدارة البلاغات</h1>
     <div class="topbar-actions">
       <div class="search-box">
         <span>🔍</span>
-        <input type="text" placeholder="بحث عن بلاغ..." id="searchInput" oninput="filterReports()" />
+        <input type="text" id="searchInput" oninput="filterReports()" />
       </div>
       <div class="lang-switcher">
         <button class="lang-btn active" onclick="setLang('ar')">ع</button>
         <button class="lang-btn" onclick="setLang('fr')">FR</button>
         <button class="lang-btn" onclick="setLang('en')">EN</button>
       </div>
-      <div class="icon-btn" onclick="showToast('🔔 لا توجد إشعارات جديدة')">
-        🔔
-        <span class="notif-dot"></span>
+      <div class="icon-btn" onclick="showToast(t('toast_no_notif'))">
+        🔔<span class="notif-dot"></span>
       </div>
-      <div class="icon-btn" onclick="showToast('⚙️ قيد التطوير')">⚙️</div>
+      <div class="icon-btn" onclick="showToast(t('toast_wip'))">⚙️</div>
     </div>
-    
   </div>
 
-  <!-- Content -->
   <div class="content">
-
     <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-icon blue">📋</div>
         <div class="stat-info">
-          <div class="stat-value" id="totalStat">12</div>
-          <div class="stat-label">إجمالي البلاغات</div>
-          <div class="stat-delta up">↑ +3 هذا الأسبوع</div>
+          <div class="stat-value" id="totalStat">—</div>
+          <div class="stat-label" data-t="stat_total">إجمالي البلاغات</div>
+          <div class="stat-delta up" data-t="stat_total_d">↑ +3 هذا الأسبوع</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon yellow">⏳</div>
         <div class="stat-info">
-          <div class="stat-value" id="pendingStat">5</div>
-          <div class="stat-label">بلاغات معلقة</div>
-          <div class="stat-delta down">⚠ تحتاج متابعة</div>
+          <div class="stat-value" id="pendingStat">—</div>
+          <div class="stat-label" data-t="stat_pending">بلاغات معلقة</div>
+          <div class="stat-delta down" data-t="stat_pending_d">⚠ تحتاج متابعة</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon blue">🔄</div>
         <div class="stat-info">
-          <div class="stat-value" id="progressStat">3</div>
-          <div class="stat-label">قيد المعالجة</div>
-          <div class="stat-delta up">● جارٍ العمل</div>
+          <div class="stat-value" id="progressStat">—</div>
+          <div class="stat-label" data-t="stat_prog">قيد المعالجة</div>
+          <div class="stat-delta up" data-t="stat_prog_d">● جارٍ العمل</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green">✅</div>
         <div class="stat-info">
-          <div class="stat-value" id="doneStat">4</div>
-          <div class="stat-label">مكتملة</div>
-          <div class="stat-delta up">↑ +2 هذا الشهر</div>
+          <div class="stat-value" id="doneStat">—</div>
+          <div class="stat-label" data-t="stat_done">مكتملة</div>
+          <div class="stat-delta up" data-t="stat_done_d">↑ +2 هذا الشهر</div>
         </div>
       </div>
     </div>
 
-    <!-- Two columns -->
     <div class="two-col">
-
-      <!-- Table card -->
+      <!-- Table -->
       <div class="card">
         <div class="card-header">
-          <h3>قائمة البلاغات</h3>
+          <h3 data-t="tbl_title">قائمة البلاغات</h3>
           <div class="filter-tabs">
-            <div class="filter-tab active" onclick="setFilter(this,'all')">الكل</div>
-            <div class="filter-tab" onclick="setFilter(this,'pending')">معلق</div>
-            <div class="filter-tab" onclick="setFilter(this,'inprogress')">جارٍ</div>
-            <div class="filter-tab" onclick="setFilter(this,'complete')">مكتمل</div>
+            <button class="filter-tab active" onclick="setFilter(this,'all')" data-t="fil_all">الكل</button>
+            <button class="filter-tab" onclick="setFilter(this,'pending')" data-t="fil_pending">معلق</button>
+            <button class="filter-tab" onclick="setFilter(this,'inprogress')" data-t="fil_inprog">جارٍ</button>
+            <button class="filter-tab" onclick="setFilter(this,'complete')" data-t="fil_done">مكتمل</button>
           </div>
         </div>
         <table>
           <thead>
             <tr>
-              <th>#</th>
-              <th>القاعة</th>
-              <th>نوع العطل</th>
-              <th>الخطورة</th>
-              <th>الحالة</th>
-              <th>التاريخ</th>
-              <th>إجراء</th>
+              <th data-t="col_id">#</th>
+              <th data-t="col_room">القاعة</th>
+              <th data-t="col_type">نوع العطل</th>
+              <th data-t="col_sev">الخطورة</th>
+              <th data-t="col_status">الحالة</th>
+              <th data-t="col_date">التاريخ</th>
+              <th data-t="col_action">إجراء</th>
             </tr>
           </thead>
           <tbody id="reportsTable"></tbody>
         </table>
       </div>
 
-      <!-- Side column -->
+      <!-- Side -->
       <div class="side-col">
-
-        <!-- Room breakdown -->
         <div class="card">
           <div class="card-header">
-            <h3>توزيع البلاغات حسب القاعة</h3>
+            <h3 data-t="room_breakdown">توزيع البلاغات حسب القاعة</h3>
           </div>
-          <div class="progress-list">
-            <div class="progress-item">
-              <div class="progress-header"><span>TD 01</span><span class="count">4 بلاغات</span></div>
-              <div class="progress-bar"><div class="progress-fill fill-blue" style="width:80%"></div></div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-header"><span>TD 02</span><span class="count">3 بلاغات</span></div>
-              <div class="progress-bar"><div class="progress-fill fill-blue" style="width:60%"></div></div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-header"><span>TP 01</span><span class="count">3 بلاغات</span></div>
-              <div class="progress-bar"><div class="progress-fill fill-red" style="width:60%"></div></div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-header"><span>TP 02</span><span class="count">2 بلاغات</span></div>
-              <div class="progress-bar"><div class="progress-fill fill-yellow" style="width:40%"></div></div>
-            </div>
+          <div class="progress-list" id="roomBreakdown">
+            <div class="empty-state"><div class="e-icon">📊</div><p>جارٍ التحميل...</p></div>
           </div>
         </div>
 
-        <!-- Leaderboard -->
         <div class="card">
           <div class="card-header">
-            <h3>🏆 أفضل المبلّغين</h3>
+            <h3 data-t="leaderboard_title">🏆 أفضل المبلّغين</h3>
           </div>
-          <div class="leaderboard-list">
-            <div class="leader-item gold">
-              <span class="rank-icon">🥇</span>
-              <div class="leader-info">
-                <div class="leader-name">أحمد تيجاني</div>
-                <div class="leader-sub">8 بلاغات مقبولة</div>
-              </div>
-              <span class="leader-points">120 نقطة</span>
-            </div>
-            <div class="leader-item">
-              <span class="rank-icon">🥈</span>
-              <div class="leader-info">
-                <div class="leader-name">جمل ابراهيم</div>
-                <div class="leader-sub">6 بلاغات مقبولة</div>
-              </div>
-              <span class="leader-points">95 نقطة</span>
-            </div>
-            <div class="leader-item">
-              <span class="rank-icon">🥉</span>
-              <div class="leader-info">
-                <div class="leader-name">عبد الحفيظي</div>
-                <div class="leader-sub">5 بلاغات مقبولة</div>
-              </div>
-              <span class="leader-points">80 نقطة</span>
-            </div>
-            <div class="leader-item">
-              <span class="rank-icon" style="font-size:14px;color:var(--gray-400)">4</span>
-              <div class="leader-info">
-                <div class="leader-name">نور الهدى مزيان</div>
-                <div class="leader-sub">4 بلاغات مقبولة</div>
-              </div>
-              <span class="leader-points" style="color:var(--gray-500)">60 نقطة</span>
-            </div>
+          <div class="leaderboard-list" id="leaderboardList">
+            <div class="empty-state"><div class="e-icon">🏆</div><p>جارٍ التحميل...</p></div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
 <!-- ══ MODAL ══ -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modalBox">
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal">
     <div class="modal-header">
       <h3 id="modalTitle">تفاصيل البلاغ</h3>
-      <span class="modal-close" onclick="closeModalDirect()">✕</span>
+      <span class="modal-close" onclick="closeModal()">✕</span>
     </div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-footer" id="modalFooter"></div>
@@ -817,54 +362,244 @@
 </div>
 
 <!-- ══ TOAST ══ -->
-<div class="toast" id="toast">
-  <span class="t-icon" id="toastIcon">✅</span>
-  <span id="toastMsg">تم التحديث</span>
-</div>
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
+<!-- ══ FIREBASE MODULE ══ -->
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs,
+         updateDoc, doc, onSnapshot,
+         query, orderBy }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyCoI_lFR8-8cnmO1AoekiHqsMcFMMRmyAU",
+  authDomain:        "signalapp-c3761.firebaseapp.com",
+  projectId:         "signalapp-c3761",
+  storageBucket:     "signalapp-c3761.firebasestorage.app",
+  messagingSenderId: "350012140438",
+  appId:             "1:350012140438:web:8e942284fc02ade9288bb7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+/* ── Expose db operations globally ── */
+window._db = {
+  async updateStatus(firestoreId, newStatus) {
+    await updateDoc(doc(db, "reports", firestoreId), { status: newStatus });
+  }
+};
+
+/* ── Real-time listener on "reports" collection ── */
+const reportsQ = query(collection(db, "reports"), orderBy("date", "desc"));
+
+onSnapshot(reportsQ, (snapshot) => {
+  window._reports = snapshot.docs.map(d => {
+    const data = d.data();
+    return {
+      firestoreId: d.id,
+      id:          data.id       || d.id,
+      room:        data.room     || '—',
+      type:        data.type     || '—',
+      severity:    data.severity || 'عادي',
+      status:      data.status   || 'pending',
+      date:        data.date     || '',
+      note:        data.note     || '',
+      reporter:    data.reporter || '—',
+    };
+  });
+  document.dispatchEvent(new Event('reports-updated'));
+}, (err) => {
+  console.error("Firestore error:", err);
+  window._firestoreError = err.message;
+  document.dispatchEvent(new Event('reports-updated'));
+});
+
+/* ── Real-time listener on "reporters" leaderboard collection ── */
+/* If you don't have a "reporters" collection, the leaderboard is
+   auto-computed from reports (see buildLeaderboard() below).      */
+</script>
+
+<!-- ══ APP LOGIC ══ -->
 <script>
-/* ── Data ── */
+/* ════════════════════════════
+   TRANSLATIONS
+════════════════════════════ */
+const T = {
+  ar: {
+    page_title:"📋 إدارة البلاغات",
+    sb_title:"منصة الصيانة", sb_sub:"مجمع الإعلام الآلي",
+    nav_lbl_main:"القائمة الرئيسية", nav_lbl_follow:"المتابعة",
+    nav_reports:"البلاغات", nav_rooms:"القاعات",
+    nav_stats:"الإحصائيات", nav_log:"سجل العمليات",
+    user_name:"مسؤول الصيانة", user_role:"مشرف أول",
+    search_ph:"بحث عن بلاغ...",
+    stat_total:"إجمالي البلاغات", stat_total_d:"↑ محدّث للتو",
+    stat_pending:"بلاغات معلقة", stat_pending_d:"⚠ تحتاج متابعة",
+    stat_prog:"قيد المعالجة", stat_prog_d:"● جارٍ العمل",
+    stat_done:"مكتملة", stat_done_d:"↑ أُغلقت",
+    tbl_title:"قائمة البلاغات",
+    fil_all:"الكل", fil_pending:"معلق", fil_inprog:"جارٍ", fil_done:"مكتمل",
+    col_id:"#", col_room:"القاعة", col_type:"نوع العطل",
+    col_sev:"الخطورة", col_status:"الحالة", col_date:"التاريخ", col_action:"إجراء",
+    status_pending:"معلق", status_inprogress:"جارٍ", status_complete:"مكتمل",
+    sev_low:"عادي", sev_med:"متوسط", sev_high:"خطير",
+    btn_view:"عرض", btn_start:"بدء", btn_finish:"إتمام",
+    btn_close:"إغلاق", btn_start_proc:"بدء المعالجة", btn_mark_done:"✅ تحديد كمكتمل",
+    modal_title:"تفاصيل البلاغ",
+    lbl_room:"القاعة", lbl_type:"نوع العطل", lbl_sev:"درجة الخطورة",
+    lbl_status:"الحالة", lbl_reporter:"المُبلِّغ", lbl_date:"التاريخ",
+    room_breakdown:"توزيع البلاغات حسب القاعة",
+    leaderboard_title:"🏆 أفضل المبلّغين",
+    ldr_reports:"بلاغات مقبولة", ldr_pts:"نقطة",
+    toast_wip:"📌 قيد التطوير",
+    toast_no_notif:"🔔 لا توجد إشعارات جديدة",
+    toast_started:"🔄 تم بدء المعالجة",
+    toast_done:"✅ تم إتمام البلاغ بنجاح",
+    toast_error:"❌ حدث خطأ، حاول مجدداً",
+    empty:"لا توجد بلاغات",
+    loading:"جارٍ تحميل البيانات...",
+  },
+  fr: {
+    page_title:"📋 Gestion des Signalements",
+    sb_title:"Maintenance", sb_sub:"Complexe Informatique",
+    nav_lbl_main:"MENU", nav_lbl_follow:"SUIVI",
+    nav_reports:"Signalements", nav_rooms:"Salles",
+    nav_stats:"Statistiques", nav_log:"Journal",
+    user_name:"Responsable", user_role:"Superviseur",
+    search_ph:"Rechercher un signalement...",
+    stat_total:"Total signalements", stat_total_d:"↑ mis à jour",
+    stat_pending:"En attente", stat_pending_d:"⚠ À traiter",
+    stat_prog:"En cours", stat_prog_d:"● Traitement actif",
+    stat_done:"Terminés", stat_done_d:"↑ Clôturés",
+    tbl_title:"Liste des signalements",
+    fil_all:"Tout", fil_pending:"En attente", fil_inprog:"En cours", fil_done:"Terminé",
+    col_id:"#", col_room:"Salle", col_type:"Type de panne",
+    col_sev:"Gravité", col_status:"Statut", col_date:"Date", col_action:"Action",
+    status_pending:"En attente", status_inprogress:"En cours", status_complete:"Terminé",
+    sev_low:"Normal", sev_med:"Modéré", sev_high:"Grave",
+    btn_view:"Voir", btn_start:"Démarrer", btn_finish:"Terminer",
+    btn_close:"Fermer", btn_start_proc:"Démarrer le traitement", btn_mark_done:"✅ Marquer terminé",
+    modal_title:"Détails du signalement",
+    lbl_room:"Salle", lbl_type:"Type de panne", lbl_sev:"Gravité",
+    lbl_status:"Statut", lbl_reporter:"Signalé par", lbl_date:"Date",
+    room_breakdown:"Signalements par salle",
+    leaderboard_title:"🏆 Meilleurs déclarants",
+    ldr_reports:"signalements acceptés", ldr_pts:"points",
+    toast_wip:"📌 En cours de développement",
+    toast_no_notif:"🔔 Aucune nouvelle notification",
+    toast_started:"🔄 Traitement démarré",
+    toast_done:"✅ Signalement clôturé avec succès",
+    toast_error:"❌ Une erreur s'est produite",
+    empty:"Aucun signalement trouvé",
+    loading:"Chargement des données...",
+  },
+  en: {
+    page_title:"📋 Reports Management",
+    sb_title:"Maintenance Panel", sb_sub:"CS Complex",
+    nav_lbl_main:"MENU", nav_lbl_follow:"TRACKING",
+    nav_reports:"Reports", nav_rooms:"Rooms",
+    nav_stats:"Statistics", nav_log:"Activity Log",
+    user_name:"Maintenance Manager", user_role:"Head Supervisor",
+    search_ph:"Search reports...",
+    stat_total:"Total Reports", stat_total_d:"↑ just updated",
+    stat_pending:"Pending Reports", stat_pending_d:"⚠ Need attention",
+    stat_prog:"In Progress", stat_prog_d:"● Active work",
+    stat_done:"Completed", stat_done_d:"↑ Closed",
+    tbl_title:"Reports List",
+    fil_all:"All", fil_pending:"Pending", fil_inprog:"In Progress", fil_done:"Done",
+    col_id:"#", col_room:"Room", col_type:"Fault Type",
+    col_sev:"Severity", col_status:"Status", col_date:"Date", col_action:"Action",
+    status_pending:"Pending", status_inprogress:"In Progress", status_complete:"Done",
+    sev_low:"Normal", sev_med:"Moderate", sev_high:"Critical",
+    btn_view:"View", btn_start:"Start", btn_finish:"Finish",
+    btn_close:"Close", btn_start_proc:"Start Processing", btn_mark_done:"✅ Mark as Done",
+    modal_title:"Report Details",
+    lbl_room:"Room", lbl_type:"Fault Type", lbl_sev:"Severity",
+    lbl_status:"Status", lbl_reporter:"Reporter", lbl_date:"Date",
+    room_breakdown:"Reports by Room",
+    leaderboard_title:"🏆 Top Reporters",
+    ldr_reports:"accepted reports", ldr_pts:"pts",
+    toast_wip:"📌 Page under development",
+    toast_no_notif:"🔔 No new notifications",
+    toast_started:"🔄 Processing started",
+    toast_done:"✅ Report closed successfully",
+    toast_error:"❌ An error occurred, please try again",
+    empty:"No reports found",
+    loading:"Loading data...",
+  }
+};
 
-const reports = [
-  { id:'RPT-001', room:'TD 01', type:'كرسي', severity:'خطير', status:'pending',  date:'2025-04-10', note:'كرسي مكسور يشكل خطرا', reporter:'أحمد بن علي' },
-  { id:'RPT-002', room:'TD 02', type:'تيار كهربائي', severity:'خطير', status:'inprogress', date:'2025-04-11', note:'انقطاع متكرر في التيار الكهربائي', reporter:'سارة بوزيد' },
-  { id:'RPT-003', room:'TP 01', type:'نافذة', severity:'عادي', status:'complete', date:'2025-04-08', note:'نافذة مكسورة لا تُغلق', reporter:'يوسف حمادي' },
-  { id:'RPT-004', room:'TD 01', type:'سبورة', severity:'متوسط', status:'pending', date:'2025-04-12', note:'سبورة ممسوحة لا تصلح', reporter:'نور الهدى مزيان' },
-  { id:'RPT-005', room:'TP 02', type:'باب', severity:'عادي', status:'complete', date:'2025-04-07', note:'الباب لا يُقفل بشكل صحيح', reporter:'أحمد بن علي' },
-  { id:'RPT-006', room:'TD 02', type:'طاولة', severity:'متوسط', status:'inprogress', date:'2025-04-13', note:'طاولة متعرجة تزعج الطلاب', reporter:'سارة بوزيد' },
-  { id:'RPT-007', room:'TP 01', type:'قابس كهرباء', severity:'خطير', status:'pending', date:'2025-04-14', note:'قابس كهرباء محترق خطير', reporter:'يوسف حمادي' },
-  { id:'RPT-008', room:'TD 01', type:'مكتب الأستاذ', severity:'عادي', status:'complete', date:'2025-04-06', note:'درج مكسور', reporter:'أحمد بن علي' },
-  { id:'RPT-009', room:'TP 02', type:'كرسي', severity:'متوسط', status:'pending', date:'2025-04-14', note:'5 كراسي بدون ظهر', reporter:'نور الهدى مزيان' },
-  { id:'RPT-010', room:'TD 02', type:'نافذة', severity:'عادي', status:'complete', date:'2025-04-05', note:'نافذة خلفية مكسورة', reporter:'أحمد بن علي' },
-  { id:'RPT-011', room:'TD 01', type:'سبورة', severity:'متوسط', status:'inprogress', date:'2025-04-13', note:'سبورة قديمة', reporter:'سارة بوزيد' },
-  { id:'RPT-012', room:'TP 01', type:'باب', severity:'خطير', status:'pending', date:'2025-04-14', note:'الباب لا يُغلق أبداً', reporter:'يوسف حمادي' },
-];
+let lang = 'ar';
+function t(k){ return T[lang][k] || k; }
 
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l === 'ar' ? 'ar' : 'en';
+  document.documentElement.dir  = l === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  applyTranslations();
+  renderTable();
+  renderRoomBreakdown();
+  renderLeaderboard();
+}
+
+function applyTranslations() {
+  document.getElementById('pageTitle').textContent    = t('page_title');
+  document.getElementById('sb-title').textContent     = t('sb_title');
+  document.getElementById('sb-sub').textContent       = t('sb_sub');
+  document.getElementById('nav-lbl-main').textContent = t('nav_lbl_main');
+  document.getElementById('nav-lbl-follow').textContent = t('nav_lbl_follow');
+  document.getElementById('searchInput').placeholder  = t('search_ph');
+  document.getElementById('loadingText').textContent  = t('loading');
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.dataset.t;
+    if (key && T[lang][key]) el.textContent = T[lang][key];
+  });
+}
+
+/* ════════════════════════════
+   STATE
+════════════════════════════ */
+let reports = [];
 let currentFilter = 'all';
 let currentSearch = '';
 
-const severityColors = { 'عادي':'#22c55e', 'متوسط':'#eab308', 'خطير':'#ef4444' };
+/* Severity → color map (language-agnostic keys) */
+const sevColor = { 'عادي':'#22c55e', 'متوسط':'#eab308', 'خطير':'#ef4444',
+                   'Normal':'#22c55e', 'Modéré':'#eab308', 'Grave':'#ef4444',
+                   'Moderate':'#eab308', 'Critical':'#ef4444' };
+function getSevColor(s){ return sevColor[s] || '#94a3b8'; }
 
-function getStatusLabel(s) {
-  if(s==='pending') return '<span class="status-badge pending"><span class="dot"></span>معلق</span>';
-  if(s==='inprogress') return '<span class="status-badge inprogress"><span class="dot"></span>جارٍ</span>';
-  return '<span class="status-badge complete"><span class="dot"></span>مكتمل</span>';
+function getStatusBadge(s){
+  const map = {
+    pending:    `<span class="status-badge pending"><span class="dot"></span>${t('status_pending')}</span>`,
+    inprogress: `<span class="status-badge inprogress"><span class="dot"></span>${t('status_inprogress')}</span>`,
+    complete:   `<span class="status-badge complete"><span class="dot"></span>${t('status_complete')}</span>`,
+  };
+  return map[s] || `<span class="status-badge">${s}</span>`;
 }
 
+/* ════════════════════════════
+   RENDER TABLE
+════════════════════════════ */
 function renderTable() {
   const tbody = document.getElementById('reportsTable');
+  const q = currentSearch.toLowerCase();
+
   const filtered = reports.filter(r => {
-    const matchFilter = currentFilter==='all' || r.status===currentFilter;
-    const matchSearch = !currentSearch ||
-      r.id.includes(currentSearch) ||
-      r.room.includes(currentSearch) ||
-      r.type.includes(currentSearch) ||
-      r.reporter.includes(currentSearch);
+    const matchFilter = currentFilter === 'all' || r.status === currentFilter;
+    const matchSearch = !q ||
+      (r.id       || '').toLowerCase().includes(q) ||
+      (r.room     || '').toLowerCase().includes(q) ||
+      (r.type     || '').toLowerCase().includes(q) ||
+      (r.reporter || '').toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
 
-  if(!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="e-icon">📭</div><p>لا توجد بلاغات</p></div></td></tr>`;
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="e-icon">📭</div><p>${t('empty')}</p></div></td></tr>`;
     return;
   }
 
@@ -874,16 +609,16 @@ function renderTable() {
       <td><span class="room-badge">🏫 ${r.room}</span></td>
       <td><span class="type-chip">${r.type}</span></td>
       <td>
-        <span class="severity-dot" style="background:${severityColors[r.severity]}"></span>
+        <span class="severity-dot" style="background:${getSevColor(r.severity)}"></span>
         ${r.severity}
       </td>
-      <td>${getStatusLabel(r.status)}</td>
+      <td>${getStatusBadge(r.status)}</td>
       <td style="font-size:12px;color:var(--gray-500)">${r.date}</td>
       <td>
         <div class="action-btns">
-          <button class="btn-sm btn-ghost" onclick="openModal('${r.id}')">عرض</button>
-          ${r.status==='pending' ? `<button class="btn-sm btn-primary" onclick="changeStatus('${r.id}','inprogress')">بدء</button>` : ''}
-          ${r.status==='inprogress' ? `<button class="btn-sm btn-success" onclick="changeStatus('${r.id}','complete')">إتمام</button>` : ''}
+          <button class="btn-sm btn-ghost" onclick="openModal('${r.firestoreId}')">${t('btn_view')}</button>
+          ${r.status === 'pending'    ? `<button class="btn-sm btn-primary" onclick="changeStatus('${r.firestoreId}','inprogress')">${t('btn_start')}</button>` : ''}
+          ${r.status === 'inprogress' ? `<button class="btn-sm btn-success" onclick="changeStatus('${r.firestoreId}','complete')">${t('btn_finish')}</button>` : ''}
         </div>
       </td>
     </tr>
@@ -892,16 +627,97 @@ function renderTable() {
   updateStats();
 }
 
+/* ════════════════════════════
+   STATS
+════════════════════════════ */
 function updateStats() {
-  document.getElementById('totalStat').textContent = reports.length;
-  document.getElementById('pendingStat').textContent = reports.filter(r=>r.status==='pending').length;
-  document.getElementById('progressStat').textContent = reports.filter(r=>r.status==='inprogress').length;
-  document.getElementById('doneStat').textContent = reports.filter(r=>r.status==='complete').length;
-  document.getElementById('pendingBadge').textContent = reports.filter(r=>r.status==='pending').length;
+  const total   = reports.length;
+  const pending = reports.filter(r => r.status === 'pending').length;
+  const prog    = reports.filter(r => r.status === 'inprogress').length;
+  const done    = reports.filter(r => r.status === 'complete').length;
+
+  document.getElementById('totalStat').textContent    = total;
+  document.getElementById('pendingStat').textContent  = pending;
+  document.getElementById('progressStat').textContent = prog;
+  document.getElementById('doneStat').textContent     = done;
+  document.getElementById('pendingBadge').textContent = pending;
 }
 
+/* ════════════════════════════
+   ROOM BREAKDOWN
+════════════════════════════ */
+function renderRoomBreakdown() {
+  const container = document.getElementById('roomBreakdown');
+  if (!reports.length) {
+    container.innerHTML = `<div class="empty-state"><div class="e-icon">📊</div><p>${t('empty')}</p></div>`;
+    return;
+  }
+
+  /* Count reports per room */
+  const roomCounts = {};
+  reports.forEach(r => {
+    roomCounts[r.room] = (roomCounts[r.room] || 0) + 1;
+  });
+
+  const sorted = Object.entries(roomCounts).sort((a,b) => b[1] - a[1]);
+  const max    = sorted[0]?.[1] || 1;
+  const palette = ['fill-blue','fill-red','fill-yellow','fill-green'];
+
+  container.innerHTML = sorted.slice(0, 6).map(([room, count], i) => `
+    <div class="progress-item">
+      <div class="progress-header">
+        <span>${room}</span>
+        <span class="count">${count} ${t('nav_reports')}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill ${palette[i % palette.length]}" style="width:${Math.round(count/max*100)}%"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════
+   LEADERBOARD (computed from reports)
+════════════════════════════ */
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboardList');
+  if (!reports.length) {
+    container.innerHTML = `<div class="empty-state"><div class="e-icon">🏆</div><p>${t('empty')}</p></div>`;
+    return;
+  }
+
+  /* Count accepted (non-pending) reports per reporter */
+  const pts = {};
+  reports.forEach(r => {
+    if (!pts[r.reporter]) pts[r.reporter] = { count:0, points:0 };
+    pts[r.reporter].count++;
+    /* Simple scoring: complete=15pts, inprogress=10pts, pending=5pts */
+    pts[r.reporter].points += r.status === 'complete' ? 15 : r.status === 'inprogress' ? 10 : 5;
+  });
+
+  const sorted = Object.entries(pts)
+    .sort((a,b) => b[1].points - a[1].points)
+    .slice(0, 4);
+
+  const medals = ['🥇','🥈','🥉'];
+
+  container.innerHTML = sorted.map(([name, data], i) => `
+    <div class="leader-item ${i===0 ? 'gold' : ''}">
+      <span class="rank-icon">${medals[i] || `<span style="font-size:14px;color:var(--gray-400)">${i+1}</span>`}</span>
+      <div class="leader-info">
+        <div class="leader-name">${name}</div>
+        <div class="leader-sub">${data.count} ${t('ldr_reports')}</div>
+      </div>
+      <span class="leader-points">${data.points} ${t('ldr_pts')}</span>
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════
+   FILTER / SEARCH
+════════════════════════════ */
 function setFilter(el, f) {
-  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   currentFilter = f;
   renderTable();
@@ -912,66 +728,92 @@ function filterReports() {
   renderTable();
 }
 
-function changeStatus(id, newStatus) {
-  const r = reports.find(x=>x.id===id);
-  if(!r) return;
-  r.status = newStatus;
+/* ════════════════════════════
+   CHANGE STATUS (Firestore)
+════════════════════════════ */
+async function changeStatus(firestoreId, newStatus) {
+  /* Optimistic update */
+  const r = reports.find(x => x.firestoreId === firestoreId);
+  if (r) r.status = newStatus;
   renderTable();
-  const msg = newStatus==='inprogress' ? '🔄 تم بدء المعالجة' : '✅ تم إتمام البلاغ بنجاح';
+
+  const msg = newStatus === 'inprogress' ? t('toast_started') : t('toast_done');
   showToast(msg);
+
+  try {
+    await window._db.updateStatus(firestoreId, newStatus);
+  } catch(err) {
+    console.error(err);
+    /* Revert optimistic update */
+    if (r) r.status = newStatus === 'inprogress' ? 'pending' : 'inprogress';
+    renderTable();
+    showToast(t('toast_error'), true);
+  }
 }
 
-/* ── Modal ── */
-function openModal(id) {
-  const r = reports.find(x=>x.id===id);
-  if(!r) return;
-  document.getElementById('modalTitle').textContent = `تفاصيل البلاغ — ${r.id}`;
+/* ════════════════════════════
+   MODAL
+════════════════════════════ */
+function openModal(firestoreId) {
+  const r = reports.find(x => x.firestoreId === firestoreId);
+  if (!r) return;
+
+  document.getElementById('modalTitle').textContent = `${t('modal_title')} — ${r.id}`;
   document.getElementById('modalBody').innerHTML = `
-    <div class="info-row"><span class="label">القاعة</span><span class="value"><span class="room-badge">🏫 ${r.room}</span></span></div>
-    <div class="info-row"><span class="label">نوع العطل</span><span class="value">${r.type}</span></div>
-    <div class="info-row"><span class="label">درجة الخطورة</span><span class="value"><span class="severity-dot" style="background:${severityColors[r.severity]}"></span> ${r.severity}</span></div>
-    <div class="info-row"><span class="label">الحالة</span><span class="value">${getStatusLabel(r.status)}</span></div>
-    <div class="info-row"><span class="label">المُبلِّغ</span><span class="value">${r.reporter}</span></div>
-    <div class="info-row"><span class="label">التاريخ</span><span class="value">${r.date}</span></div>
+    <div class="info-row"><span class="label">${t('lbl_room')}</span><span class="value"><span class="room-badge">🏫 ${r.room}</span></span></div>
+    <div class="info-row"><span class="label">${t('lbl_type')}</span><span class="value">${r.type}</span></div>
+    <div class="info-row"><span class="label">${t('lbl_sev')}</span><span class="value"><span class="severity-dot" style="background:${getSevColor(r.severity)}"></span> ${r.severity}</span></div>
+    <div class="info-row"><span class="label">${t('lbl_status')}</span><span class="value">${getStatusBadge(r.status)}</span></div>
+    <div class="info-row"><span class="label">${t('lbl_reporter')}</span><span class="value">${r.reporter}</span></div>
+    <div class="info-row"><span class="label">${t('lbl_date')}</span><span class="value">${r.date}</span></div>
     <div class="desc-box">💬 ${r.note}</div>
   `;
 
   const footer = document.getElementById('modalFooter');
-  footer.innerHTML = `<button class="btn-lg outline" onclick="closeModalDirect()">إغلاق</button>`;
-  if(r.status==='pending')
-    footer.innerHTML += `<button class="btn-lg primary" onclick="changeStatus('${r.id}','inprogress');closeModalDirect()">بدء المعالجة</button>`;
-  if(r.status==='inprogress')
-    footer.innerHTML += `<button class="btn-lg success" onclick="changeStatus('${r.id}','complete');closeModalDirect()">✅ تحديد كمكتمل</button>`;
+  footer.innerHTML = `<button class="btn-lg outline" onclick="closeModal()">${t('btn_close')}</button>`;
+  if (r.status === 'pending')
+    footer.innerHTML += `<button class="btn-lg primary" id="modalActionBtn" onclick="changeStatus('${r.firestoreId}','inprogress');closeModal()">${t('btn_start_proc')}</button>`;
+  if (r.status === 'inprogress')
+    footer.innerHTML += `<button class="btn-lg success" id="modalActionBtn" onclick="changeStatus('${r.firestoreId}','complete');closeModal()">${t('btn_mark_done')}</button>`;
 
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function closeModal(e) {
-  if(e.target===document.getElementById('modalOverlay')) closeModalDirect();
-}
-function closeModalDirect() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
+function closeModal()      { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeModalOnBg(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
 
-/* ── Toast ── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
+/* ════════════════════════════
+   TOAST
+════════════════════════════ */
+function showToast(msg, isError=false) {
+  const el = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3000);
+  el.classList.toggle('error', isError);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3200);
 }
 
-/* ── Nav ── */
-function setPage(el, name) {
-  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-  el.classList.add('active');
-  const icons = { 'البلاغات':'📋', 'القاعات':'🏫', 'الفريق':'👷', 'الإحصائيات':'📊', 'السجل':'🗂️' };
-  document.getElementById('pageTitle').textContent = `إدارة القاعات`;
-  if(name!=='البلاغات') showToast(`📌 صفحة "${name}" قيد التطوير`);
-}
+/* ════════════════════════════
+   FIREBASE → UI bridge
+════════════════════════════ */
+document.addEventListener('reports-updated', () => {
+  reports = window._reports || [];
 
-/* ── Init ── */
-renderTable();
+  document.getElementById('loadingOverlay').classList.add('hidden');
+
+  if (window._firestoreError) {
+    showToast('❌ ' + window._firestoreError, true);
+  }
+
+  renderTable();
+  renderRoomBreakdown();
+  renderLeaderboard();
+});
+
+/* ════════════════════════════
+   INIT
+════════════════════════════ */
+applyTranslations();
 </script>
 </body>
 </html>
