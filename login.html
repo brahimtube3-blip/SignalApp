@@ -625,6 +625,9 @@ function fbE(code){
     'auth/wrong-password':t('e_wrong_pw'),'auth/invalid-credential':t('e_wrong_pw'),
     'auth/user-not-found':t('e_no_user'),'auth/too-many-requests':t('e_many'),
     'auth/email-already-in-use':t('e_used'),
+    'auth/unauthorized-domain':'المجال غير مصرح به في إعدادات Firebase Auth',
+    'auth/popup-blocked-by-browser':'تم حظر نافذة Google. رجاءً افتحها أو استخدم متصفح آخر',
+    'auth/popup-closed-by-user':'تم إغلاق نافذة Google قبل اكتمال الدخول'
   })[code]||t('e_gen');
 }
 
@@ -722,8 +725,10 @@ async function doGoogle(){
     showLov(false);showToast(t('t_google'));
     setTimeout(redirect,800);
   }catch(e){
+    console.error('Google login error', e);
     showLov(false);
-    if(e.code!=='auth/popup-closed-by-user')showToast(t('e_gen'));
+    const message = fbE(e.code) || e.message || t('e_gen');
+    if(message) showToast(message);
   }
 }
 
