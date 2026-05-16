@@ -663,11 +663,16 @@ tbody tr.row-other{border-right:3px solid var(--g400);}
         <div class="card">
           <div class="card-header">
             <h3 data-k="tbl_title">قائمة البلاغات</h3>
+            <div class="view-toggle" style="margin-right:auto; margin-left:10px;">
+              <button class="view-btn active" id="listBtn" onclick="setReportView('list')" title="عرض قائمة">☰</button>
+              <button class="view-btn" id="groupBtn" onclick="setReportView('group')" title="تجميع تلقائي (AI)">🗂️</button>
+            </div>
             <div class="filter-tabs">
               <button class="filter-tab active" onclick="setFilter(this,'all')" data-k="fil_all">الكل</button>
               <button class="filter-tab" onclick="setFilter(this,'pending')" data-k="fil_pending">معلق</button>
               <button class="filter-tab" onclick="setFilter(this,'inprogress')" data-k="fil_inprog">جارٍ</button>
               <button class="filter-tab" onclick="setFilter(this,'complete')" data-k="fil_done">مكتمل</button>
+              <button class="filter-tab" onclick="setFilter(this,'spam')" style="color:var(--red)">سبام 🚨</button>
             </div>
           </div>
           <div style="overflow-x:auto;">
@@ -950,8 +955,12 @@ window._startReportsListener = function() {
         note: data.note || '—',
         reporter: data.reporter || data.studentUid || 'مجهول',
         severity: data.severity || 'عادي',
-        imageUrl: data.imageUrl || data.image || null,
+        imageUrl: data.imageUrl || data.image || (data.imageBase64 ? `data:image/jpeg;base64,${data.imageBase64}` : null),
         imagePath: data.imagePath || null,
+        reporter_name: data.reporter_name || '—',
+        reporter_email: data.reporter_email || '—',
+        userUid: data.userUid || null,
+        isSpam: data.isSpam || false,
       };
     });
 
@@ -1591,12 +1600,41 @@ function getImgCell(r) {
   return `<div class="no-img" title="${t('no_img')}">📷</div>`;
 }
 
+let reportViewMode = 'list';
+function setReportView(mode) {
+  reportViewMode = mode;
+  document.getElementById('listBtn').classList.toggle('active', mode === 'list');
+  document.getElementById('groupBtn').classList.toggle('active', mode === 'group');
+  renderTable();
+}
+
+function restoreReport(firestoreId) {
+  window._db.updateReportStatus(firestoreId, 'pending', window._adminEmail, false, '').then(() => {
+    showToast('✅ تم استرجاع البلاغ', 'success');
+  });
+}
+
+async function blockUser(uid, firestoreId) {
+  if (!uid) return showToast('❌ لا يوجد معرف للمستخدم', 'error');
+  try {
+    const { doc, updateDoc, getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = getFirestore();
+    await updateDoc(doc(db, "users", uid), { isActive: false, isBlocked: true });
+    showToast('🚫 تم حظر المستخدم بنجاح', 'success');
+    // Also delete or mark report as handled?
+  } catch(e) {
+    console.error(e);
+    showToast('❌ فشل حظر المستخدم', 'error');
+  }
+}
+
 function renderTable() {
   const tbody = document.getElementById('reportsTable');
   if (!tbody) return;
   const q = currentSearch.toLowerCase();
-  const filtered = reports.filter(r => {
-    const mf = currentFilter === 'all' || r.status === currentFilter;
+  
+  let filtered = reports.filter(r => {
+    const mf = currentFilter === 'all' ? !r.isSpam : currentFilter === 'spam' ? r.isSpam : (r.status === currentFilter && !r.isSpam);
     const ms = !q || r.id.toLowerCase().includes(q) || r.room.toLowerCase().includes(q)
       || r.defect.toLowerCase().includes(q) || r.reporter.toLowerCase().includes(q);
     return mf && ms;
@@ -1606,20 +1644,32 @@ function renderTable() {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="ei">📭</div><p>${t('empty')}</p></div></td></tr>`;
     updateStats(); return;
   }
-
-  tbody.innerHTML = filtered.map(r => {
+  
+  const renderRow = (r, isGroupChild = false) => {
     const cls = getDefectClass(r.defect);
     const emoji = getDefectEmoji(r.defect);
     let actionBtns = `<button class="btn-sm btn-ghost" onclick="openReportModal('${r.firestoreId}')">${t('btn_view')}</button>`;
-    if (r.status === 'pending') actionBtns += `<button class="btn-sm btn-primary" onclick="changeStatus('${r.firestoreId}','inprogress')">${t('btn_start')}</button>`;
-    if (r.status === 'inprogress') {
-      actionBtns += `<button class="btn-sm btn-warn" onclick="changeStatus('${r.firestoreId}','pending')">${t('btn_back_pending')}</button>`;
-      actionBtns += `<button class="btn-sm btn-success" onclick="changeStatus('${r.firestoreId}','complete')">${t('btn_finish')}</button>`;
+    
+    if (r.isSpam) {
+      actionBtns += `<button class="btn-sm btn-success" onclick="restoreReport('${r.firestoreId}')">✅ استرجاع</button>
+                     <button class="btn-sm btn-danger-sm" onclick="blockUser('${r.userUid}', '${r.firestoreId}')">🚫 حظر المستخدم</button>`;
+    } else {
+      if (r.status === 'pending') actionBtns += `<button class="btn-sm btn-primary" onclick="changeStatus('${r.firestoreId}','inprogress')">${t('btn_start')}</button>`;
+      if (r.status === 'inprogress') {
+        actionBtns += `<button class="btn-sm btn-warn" onclick="changeStatus('${r.firestoreId}','pending')">${t('btn_back_pending')}</button>`;
+        actionBtns += `<button class="btn-sm btn-success" onclick="changeStatus('${r.firestoreId}','complete')">${t('btn_finish')}</button>`;
+      }
+      if (r.status === 'complete') actionBtns += `<button class="btn-sm btn-warn" onclick="changeStatus('${r.firestoreId}','inprogress')">${t('btn_back_inprog')}</button>`;
+      actionBtns += `<button class="btn-sm btn-danger-sm" onclick="openDeleteReportModal('${r.firestoreId}')">${t('btn_del_report')}</button>`;
     }
-    if (r.status === 'complete') actionBtns += `<button class="btn-sm btn-warn" onclick="changeStatus('${r.firestoreId}','inprogress')">${t('btn_back_inprog')}</button>`;
-    actionBtns += `<button class="btn-sm btn-danger-sm" onclick="openDeleteReportModal('${r.firestoreId}')">${t('btn_del_report')}</button>`;
 
-    return `<tr class="row-${cls}">
+    // Row color based on priority/severity
+    let rowBg = '';
+    if (r.isSpam) rowBg = 'background-color: var(--red-p);';
+    else if (cls === 'broken' || cls === 'elec') rowBg = 'background-color: #fff1f2;';
+    else if (r.status === 'pending') rowBg = 'background-color: #fefce8;';
+
+    return `<tr class="row-${cls}" style="${rowBg} ${isGroupChild ? 'opacity:0.9; border-left:4px solid var(--g300);' : ''}">
       <td><span class="report-id">${r.id}</span></td>
       <td><span class="room-badge">🏫 ${r.room}</span></td>
       <td><span class="type-chip ${cls}">${emoji} ${r.defect}</span></td>
@@ -1628,7 +1678,43 @@ function renderTable() {
       <td style="font-size:12.5px;color:var(--g500)">${r.date}</td>
       <td><div class="action-btns">${actionBtns}</div></td>
     </tr>`;
-  }).join('');
+  };
+
+  if (reportViewMode === 'group') {
+    // AI Grouping logic
+    const groups = {};
+    filtered.forEach(r => {
+      const key = `${r.room}-${r.defect}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+    
+    tbody.innerHTML = Object.keys(groups).map(key => {
+      const group = groups[key];
+      if (group.length === 1) return renderRow(group[0]);
+      
+      // It's a group of multiple similar reports
+      const first = group[0];
+      const emoji = getDefectEmoji(first.defect);
+      
+      let html = `<tr style="background:var(--g50); border-bottom: 2px solid var(--g200);">
+        <td colspan="7">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:16px;">🗂️</span>
+            <strong style="color:var(--primary); font-family:var(--font-main);">تم تجميع ${group.length} بلاغات متشابهة (نفس العطل في نفس القاعة)</strong>
+            <span class="type-chip ${getDefectClass(first.defect)}">${emoji} ${first.defect}</span>
+            <span class="room-badge">🏫 ${first.room}</span>
+          </div>
+        </td>
+      </tr>`;
+      html += group.map(r => renderRow(r, true)).join('');
+      return html;
+    }).join('');
+    
+  } else {
+    tbody.innerHTML = filtered.map(r => renderRow(r)).join('');
+  }
+  
   updateStats();
 }
 
